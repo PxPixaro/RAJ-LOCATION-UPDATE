@@ -79,25 +79,27 @@ table{border-collapse:separate;border-spacing:0;width:100%;min-width:1150px;font
   </section>
 </div>
 <div class="toast" id="toast"></div>
-<script src="data.js"></script>
 <script>
-let data=[...(window.MASTER_DATA||[])];
+let data=[];
 const EXPECTED_TOTAL=58893;
-const MORE_FILES=['data-more-1.js','data-more-2.js','data-more-3.js','data-more-4.js'];
 const PAGE=100;
 let page=1, filtered=[], backgroundLoading=true;
 const pending=new Map(JSON.parse(sessionStorage.getItem('locationPendingV2')||'[]'));
 let committed=JSON.parse(localStorage.getItem('locationCommittedV2')||'{}');
 let history=JSON.parse(localStorage.getItem('locationHistoryV2')||'[]');
 let fullMasterPromise=null;
+let originalGroups=[];
+let originalGroupSet=new Set();
 
 function clean(v){return String(v??'').trim()}
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 function keyOf(r,i){return clean(r.Code)+'@@'+i}
 function normText(s){return clean(s).replace(/\s+/g,' ')}
 
-const originalGroups=[...(window.MASTER_GROUPS||[])];
-const originalGroupSet=new Set(originalGroups.map(x=>normText(x).toLowerCase()).filter(Boolean));
+function setOriginalGroups(groups){
+  originalGroups=[...groups];
+  originalGroupSet=new Set(originalGroups.map(x=>normText(x).toLowerCase()).filter(Boolean));
+}
 function canonicalGroup(raw){
   const g=normText(raw); if(!g)return 'UNGROUPED';
   const low=g.toLowerCase();
@@ -126,8 +128,6 @@ function prepareRow(r){
   r.__search=[r.__group,r.__subgroup,r.Code,r.Name,r.Unit,r.Location1].join(' ').toLowerCase();
   return r;
 }
-data.forEach(prepareRow);
-
 function sortData(){data.sort((a,b)=>a.__group.localeCompare(b.__group,undefined,{numeric:true}) || a.__subgroup.localeCompare(b.__subgroup,undefined,{numeric:true}) || clean(a.Code).localeCompare(clean(b.Code),undefined,{numeric:true,sensitivity:'base'}))}
 sortData();
 
@@ -207,9 +207,23 @@ function commitAll(){
 }
 
 function loadScript(src){return new Promise((resolve,reject)=>{const sc=document.createElement('script');sc.src=src;sc.onload=()=>resolve();sc.onerror=reject;document.body.appendChild(sc)})}
+async function fetchGzipJson(src){
+  const res=await fetch(src,{cache:'force-cache'});if(!res.ok)throw new Error(`Could not load ${src} (${res.status})`);
+  if('DecompressionStream' in window && res.body){
+    const stream=res.body.pipeThrough(new DecompressionStream('gzip'));
+    return JSON.parse(await new Response(stream).text());
+  }
+  const bytes=new Uint8Array(await res.arrayBuffer());
+  if(!window.pako)await loadScript('https://cdn.jsdelivr.net/npm/pako@2.1.0/dist/pako.min.js');
+  return JSON.parse(new TextDecoder().decode(window.pako.ungzip(bytes)));
+}
+function coreFromArray(a){return {__i:a[0],Group:a[1],Code:a[2],Name:a[3],Unit:a[4],Location1:a[5]}}
 async function loadFullMaster(){
-  if(window.FULL_MASTER_DATA)return window.FULL_MASTER_DATA;
-  if(!fullMasterPromise)fullMasterPromise=(async()=>{toast('Loading full master for export…');await loadScript('data-full.js');return window.FULL_MASTER_DATA||[]})();
+  if(!fullMasterPromise)fullMasterPromise=(async()=>{
+    toast('Loading compressed full master for export…');
+    const pack=await fetchGzipJson('master-full.json.gz'), cols=pack.columns||[];
+    return (pack.rows||[]).map(a=>{const o={};for(let i=0;i<cols.length;i++)o[cols[i]]=a[i];return o});
+  })();
   return fullMasterPromise;
 }
 function overlayCommittedOnFull(full){return full.map((r,idx)=>{const k=clean(r.Code)+'@@'+idx;const out={...r};if(committed[k]!==undefined)out.Location1=committed[k];out['Location Update']='';return out})}
@@ -232,22 +246,34 @@ async function downloadUpdatedOnly(){
 
 async function loadRemainingCore(){
   const status=document.getElementById('loadStatus');
-  for(let n=1;n<=MORE_FILES.length;n++){
-    status.textContent=`Actual locations ready • loading remaining products ${n}/${MORE_FILES.length}…`;
-    await new Promise(r=>setTimeout(r,n===1?250:80));
-    await loadScript(MORE_FILES[n-1]);
-    const chunk=window[`MASTER_MORE_${n}`]||[];chunk.forEach(prepareRow);data.push(...chunk);delete window[`MASTER_MORE_${n}`];
-    updateStats();
-  }
-  sortData();backgroundLoading=false;refreshGroupOptions();filterRows();status.textContent='Full master loaded ✓';
+  try{
+    status.textContent='Actual locations ready • loading remaining products in background…';
+    await new Promise(r=>setTimeout(r,250));
+    const pack=await fetchGzipJson('data-rest.json.gz');
+    const chunk=(pack.rows||[]).map(coreFromArray);chunk.forEach(prepareRow);data.push(...chunk);
+    sortData();backgroundLoading=false;refreshGroupOptions();filterRows();status.textContent='Full master loaded ✓';
+  }catch(e){backgroundLoading=false;status.textContent='Actual locations ready • remaining data could not load';console.error(e);renderPager();}
 }
+
+async function initializeApp(){
+  const status=document.getElementById('loadStatus');
+  try{
+    status.textContent='Loading actual Location1 data…';
+    const pack=await fetchGzipJson('data-location.json.gz');
+    setOriginalGroups(pack.groups||[]);
+    data=(pack.rows||[]).map(coreFromArray);data.forEach(prepareRow);sortData();
+    refreshGroupOptions();filterRows();
+    status.textContent=`${data.length.toLocaleString()} actual locations ready • loading remaining master…`;
+    if('requestIdleCallback' in window)requestIdleCallback(()=>loadRemainingCore(),{timeout:700});else setTimeout(loadRemainingCore,350);
+  }catch(e){backgroundLoading=false;status.textContent='Data load failed — refresh the page';console.error(e);toast('Master data could not load.');}
+}
+
 
 search.addEventListener('input',()=>{clearTimeout(window.__st);window.__st=setTimeout(filterRows,80)});
 groupSel.addEventListener('change',()=>{subgroupSel.value='';fillSubGroups();filterRows()});subgroupSel.addEventListener('change',filterRows);
 document.getElementById('updateAll').onclick=commitAll;document.getElementById('exportMaster').onclick=exportFullMaster;document.getElementById('downloadUpdated').onclick=downloadUpdatedOnly;
 document.getElementById('clearPending').onclick=()=>{if(pending.size&&confirm('Clear all pending location entries?')){pending.clear();sessionStorage.removeItem('locationPendingV2');savePending();render()}};
 setInterval(()=>document.getElementById('clock').textContent=new Date().toLocaleString(),1000);
-filterRows();
-if('requestIdleCallback' in window)requestIdleCallback(()=>loadRemainingCore(),{timeout:700});else setTimeout(loadRemainingCore,350);
+initializeApp();
 </script>
 </body></html>
