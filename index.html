@@ -30,13 +30,13 @@ header{position:sticky;top:0;z-index:30;background:linear-gradient(105deg,#fffff
 .pending-card{margin-top:11px;padding:11px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px}.pending-card strong{color:var(--warn)}.pending-note{font-size:11.5px;color:var(--muted);margin-top:2px}
 .table-card{margin-top:11px;overflow:hidden}.table-scroll{overflow:auto;max-height:calc(100vh - 310px)}
 table{border-collapse:separate;border-spacing:0;width:100%;min-width:820px;font-size:11.8px;table-layout:auto}th{position:sticky;top:0;z-index:5;background:linear-gradient(180deg,#e9f5ff,#ddecfb);color:#154d84;text-align:left;padding:8px 6px;border-bottom:1px solid #ccd8e8;white-space:normal;line-height:1.05;font-size:10.5px;text-transform:uppercase;letter-spacing:.015em}td{padding:7px 6px;border-bottom:1px solid #ebeff5;vertical-align:middle}tr:hover td{background:#f8fbff}
-.group{font-weight:800;color:#163e6d;white-space:nowrap}.code{font-weight:800;color:#0b4f9c;white-space:nowrap}.name{min-width:230px}.unit{font-weight:700;color:#344054;white-space:nowrap;width:42px}.loc1{font-weight:850;color:#153e75;background:#f5f9ff;white-space:nowrap;width:1%}.loc-head,.update-head{text-align:center;white-space:normal;width:1%;min-width:78px}.loc-input{min-width:110px;width:118px;max-width:140px;padding:7px 7px;font-size:11.5px}.slash-col{width:42px;text-align:center}.slash-btn{width:38px;height:34px;border:1px solid #f2b400;border-radius:9px;background:linear-gradient(135deg,#fff6c9,#ffd448);color:#075cae;font-size:20px;font-weight:950;line-height:1;cursor:pointer;box-shadow:0 2px 7px rgba(245,159,0,.18)}.slash-btn:active{transform:scale(.96)}.loc-input.pending{border-color:#f79009;background:var(--warnBg)}
+.group{font-weight:800;color:#163e6d;white-space:nowrap}.code{font-weight:800;color:#0b4f9c;white-space:nowrap}.name{min-width:230px}.unit{font-weight:700;color:#344054;white-space:nowrap;width:42px}.loc1,.loc2,.loc3{font-weight:850;color:#153e75;background:#f5f9ff;white-space:nowrap;width:1%;max-width:105px}.loc2{background:#f8fbff}.loc3{background:#fbfcff}.loc-head,.update-head,.target-head{text-align:center;white-space:normal;width:1%;min-width:66px}.target-select{min-width:58px;width:62px;padding:7px 5px;font-size:11px;font-weight:800;border:1px solid #c7d2e0;border-radius:9px;background:#fff}.loc-input{min-width:105px;width:112px;max-width:135px;padding:7px 7px;font-size:11.5px}.slash-col{width:42px;text-align:center}.slash-btn{width:38px;height:34px;border:1px solid #f2b400;border-radius:9px;background:linear-gradient(135deg,#fff6c9,#ffd448);color:#075cae;font-size:20px;font-weight:950;line-height:1;cursor:pointer;box-shadow:0 2px 7px rgba(245,159,0,.18)}.slash-btn:active{transform:scale(.96)}.loc-input.pending{border-color:#f79009;background:var(--warnBg)}
 .row-updated td{background:linear-gradient(90deg,rgba(236,253,243,.55),transparent 45%)}
 .pagination{padding:11px;display:flex;justify-content:center;gap:8px;align-items:center;border-top:1px solid var(--line);font-size:12px}.empty{padding:55px;text-align:center;color:var(--muted)}
 .toast{position:fixed;right:18px;bottom:18px;background:#102a4c;color:#fff;padding:12px 16px;border-radius:11px;box-shadow:var(--shadow);opacity:0;transform:translateY(12px);pointer-events:none;transition:.2s;z-index:60}.toast.show{opacity:1;transform:none}
 .filter-label{display:none}.hint{padding:8px 11px;background:linear-gradient(90deg,#eef8ff,#fff8df);border:1px solid #d7e7f5;border-left:4px solid var(--gold);border-radius:10px;color:#315578;font-size:11.5px;margin-bottom:11px}
 @media(max-width:1150px){.toolbar{grid-template-columns:1fr 1fr 1fr}.search{grid-column:1/-1}.actions{grid-column:1/-1;justify-content:flex-start}.table-scroll{max-height:calc(100vh - 400px)}}
-@media(max-width:700px){.toolbar{grid-template-columns:1fr}.search,.actions{grid-column:auto}.header-inner{padding:8px 9px}.wrap{padding:7px}.brand-logo{width:68px;height:43px;flex-basis:68px}.brand-title{font-size:15px}.brand-sub{font-size:9.5px}.clock{display:none}.stats{gap:10px}.pending-card{align-items:flex-start;flex-direction:column}.table-scroll{max-height:calc(100vh - 450px)}table{min-width:545px;font-size:9.2px}th{font-size:8px;padding:5px 2px;letter-spacing:0}td{padding:5px 2px}.group{width:58px;max-width:58px;white-space:normal;overflow-wrap:anywhere;line-height:1.05}.code{width:78px;max-width:82px;white-space:normal;overflow-wrap:anywhere;font-size:9px;line-height:1.05}.name{min-width:118px;width:145px;max-width:155px;white-space:normal;overflow-wrap:anywhere;line-height:1.08}.unit{width:28px;font-size:9px}.loc-head,.update-head{min-width:54px;width:54px}.loc1{width:56px;max-width:70px;font-size:9.4px;white-space:normal;overflow-wrap:anywhere;line-height:1.05}.loc-input{min-width:76px;width:80px;max-width:88px;font-size:9.2px;padding:5px 4px}.slash-col{width:30px}.slash-btn{width:28px;height:28px;font-size:17px;border-radius:7px}}
+@media(max-width:700px){.toolbar{grid-template-columns:1fr}.search,.actions{grid-column:auto}.header-inner{padding:8px 9px}.wrap{padding:7px}.brand-logo{width:68px;height:43px;flex-basis:68px}.brand-title{font-size:15px}.brand-sub{font-size:9.5px}.clock{display:none}.stats{gap:10px}.pending-card{align-items:flex-start;flex-direction:column}.table-scroll{max-height:calc(100vh - 450px)}table{min-width:690px;font-size:9px}th{font-size:8px;padding:5px 2px;letter-spacing:0}td{padding:5px 2px}.group{width:58px;max-width:58px;white-space:normal;overflow-wrap:anywhere;line-height:1.05}.code{width:78px;max-width:82px;white-space:normal;overflow-wrap:anywhere;font-size:9px;line-height:1.05}.name{min-width:118px;width:145px;max-width:155px;white-space:normal;overflow-wrap:anywhere;line-height:1.08}.unit{width:28px;font-size:9px}.loc-head,.update-head,.target-head{min-width:46px;width:48px}.loc1,.loc2,.loc3{width:48px;max-width:58px;font-size:8.8px;white-space:normal;overflow-wrap:anywhere;line-height:1.02}.target-select{min-width:45px;width:46px;padding:4px 2px;font-size:8.8px}.loc-input{min-width:72px;width:76px;max-width:82px;font-size:9px;padding:5px 3px}.slash-col{width:30px}.slash-btn{width:28px;height:28px;font-size:17px;border-radius:7px}}
 </style>
 </head>
 <body>
@@ -50,7 +50,7 @@ table{border-collapse:separate;border-spacing:0;width:100%;min-width:820px;font-
   </div>
 </header>
 <div class="wrap">
-  <div class="hint">Group filter is consolidated for easier selection. Examples: <b>Ashwamegh variants → ASHWAMEGH</b>, <b>Bravo variants → BRAVO</b>, <b>Emmbross / Emm-Cross → EMMBROSS</b>, <b>Fenner variants → FENNER</b>, <b>KBX variants → KBX</b>, <b>Mann variants → MANN</b>, <b>RJ LUK variants → RJ LUK</b>, <b>SF variants → SF</b>, <b>Valeo variants → VALEO</b>, <b>Wix variants → WIX</b>. Sub Group keeps the original master group name. <b id="loadStatus" style="color:#0065c8">Loading actual-location products first…</b></div>
+  <div class="hint">Group filter is consolidated for easier selection. Examples: <b>Ashwamegh variants → ASHWAMEGH</b>, <b>Bravo variants → BRAVO</b>, <b>Emmbross / Emm-Cross → EMMBROSS</b>, <b>Fenner variants → FENNER</b>, <b>KBX variants → KBX</b>, <b>Mann variants → MANN</b>, <b>RJ LUK variants → RJ LUK</b>, <b>SF variants → SF</b>, <b>Valeo variants → VALEO</b>, <b>Wix variants → WIX</b>. Sub Group keeps the original master group name. <b id="loadStatus" style="color:#0065c8">Loading products with saved locations first…</b></div>
   <section class="toolbar">
     <div class="search"><input id="search" autocomplete="off" placeholder="Universal Search: Part Number, Name, Location, Group..." /></div>
     <select id="group"><option value="">All Groups</option></select>
@@ -68,12 +68,12 @@ table{border-collapse:separate;border-spacing:0;width:100%;min-width:820px;font-
     <div class="stat"><b id="historyCount">0</b><span>Total Updated Entries</span></div>
   </section>
   <section class="pending-card">
-    <div><strong id="pendingText">No pending updates.</strong><div class="pending-note">Search / filter बदलने पर भी pending location entries सुरक्षित रहेंगी. Update All करने पर Location1 overwrite होगी.</div></div>
+    <div><strong id="pendingText">No pending updates.</strong><div class="pending-note">हर row में 1 / 2 / 3 चुनें. Update All करने पर चुनी हुई Location1 / Location2 / Location3 में नई location overwrite होगी.</div></div>
     <button id="clearPending" class="btn btn-danger">Clear Pending</button>
   </section>
   <section class="table-card">
     <div class="table-scroll"><table><thead><tr>
-      <th>Group</th><th>Part Number</th><th>Name</th><th>Unit</th><th class="loc-head">Location1<br>(Actual)</th><th class="slash-col">/</th><th class="update-head">Update<br>Location</th>
+      <th>Group</th><th>Part Number</th><th>Name</th><th>Unit</th><th class="loc-head">Location<br>1</th><th class="loc-head">Location<br>2</th><th class="loc-head">Location<br>3</th><th class="target-head">Update<br>To</th><th class="slash-col">/</th><th class="update-head">Update<br>Location</th>
     </tr></thead><tbody id="tbody"></tbody></table></div>
     <div class="pagination" id="pager"></div>
   </section>
@@ -81,199 +81,63 @@ table{border-collapse:separate;border-spacing:0;width:100%;min-width:820px;font-
 <div class="toast" id="toast"></div>
 <script>
 let data=[];
-const EXPECTED_TOTAL=58893;
-const PAGE=100;
+const EXPECTED_TOTAL=58893, PAGE=100;
 let page=1, filtered=[], backgroundLoading=true;
-const pending=new Map(JSON.parse(sessionStorage.getItem('locationPendingV2')||'[]'));
-let committed=JSON.parse(localStorage.getItem('locationCommittedV2')||'{}');
-let history=JSON.parse(localStorage.getItem('locationHistoryV2')||'[]');
-let fullMasterPromise=null;
-let originalGroups=[];
-let originalGroupSet=new Set();
-
+const PKEY='locationPendingV3', CKEY='locationCommittedV3', HKEY='locationHistoryV3';
+const pending=new Map(JSON.parse(sessionStorage.getItem(PKEY)||'[]'));
+let committed=JSON.parse(localStorage.getItem(CKEY)||'{}');
+let history=JSON.parse(localStorage.getItem(HKEY)||'[]');
+let fullMasterPromise=null, originalGroups=[], originalGroupSet=new Set();
 function clean(v){return String(v??'').trim()}
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 function keyOf(r,i){return clean(r.Code)+'@@'+i}
 function normText(s){return clean(s).replace(/\s+/g,' ')}
-
-function setOriginalGroups(groups){
-  originalGroups=[...groups];
-  originalGroupSet=new Set(originalGroups.map(x=>normText(x).toLowerCase()).filter(Boolean));
-}
+function setOriginalGroups(groups){originalGroups=[...groups];originalGroupSet=new Set(originalGroups.map(x=>normText(x).toLowerCase()).filter(Boolean))}
 function canonicalGroup(raw){
-  const g=normText(raw); if(!g)return 'UNGROUPED';
-  const low=g.toLowerCase();
-  if(/^ashwamegh(?:\b|[\s\-_/])/.test(low)) return 'ASHWAMEGH';
-  if(/^bravo(?:\b|[\s\-_/])/.test(low)) return 'BRAVO';
-  if(/^emm\/cross$/.test(low) || /^emmbross(?:\b|[\s\-_/])/.test(low)) return 'EMMBROSS';
-  if(/^fenner(?:\b|[\s\-_/])/.test(low)) return 'FENNER';
-  if(/^kbx(?:\b|[\s\-_(])/.test(low) || /^kbxb(?:\b|[\s\-_/])/.test(low) || /^kbxh(?:\b|[\s\-_/])/.test(low)) return 'KBX';
-  if(/^mann(?:\b|[\s\-_/])/.test(low)) return 'MANN';
-  if(/^rj\s+luk(?:\b|[\s\-_/])/.test(low)) return 'RJ LUK';
-  if(/^(sf|sfc|sfct|sfg|sft)$/.test(low)) return 'SF';
-  if(/^valeo(?:\b|[\s\-_/])/.test(low)) return 'VALEO';
-  if(/^wix(?:\b|[\s\-_/])/.test(low)) return 'WIX';
-  const cutPoints=[]; for(let i=1;i<g.length;i++){if(g[i]==='-'||g[i]==='/'||g[i]==='_')cutPoints.push(i)}
-  for(const pos of cutPoints){const p=normText(g.slice(0,pos));if(p && originalGroupSet.has(p.toLowerCase()))return p.toUpperCase()}
-  if(g.endsWith('/')){const p=normText(g.slice(0,-1));if(originalGroupSet.has(p.toLowerCase()))return p.toUpperCase()}
-  return g.toUpperCase();
+ const g=normText(raw);if(!g)return 'UNGROUPED';const low=g.toLowerCase();
+ if(/^ashwamegh(?:\b|[\s\-_/])/.test(low))return 'ASHWAMEGH';if(/^bravo(?:\b|[\s\-_/])/.test(low))return 'BRAVO';
+ if(/^emm\/cross$/.test(low)||/^emmbross(?:\b|[\s\-_/])/.test(low))return 'EMMBROSS';if(/^fenner(?:\b|[\s\-_/])/.test(low))return 'FENNER';
+ if(/^kbx(?:\b|[\s\-_(])/.test(low)||/^kbxb(?:\b|[\s\-_/])/.test(low)||/^kbxh(?:\b|[\s\-_/])/.test(low))return 'KBX';
+ if(/^mann(?:\b|[\s\-_/])/.test(low))return 'MANN';if(/^rj\s+luk(?:\b|[\s\-_/])/.test(low))return 'RJ LUK';if(/^(sf|sfc|sfct|sfg|sft)$/.test(low))return 'SF';
+ if(/^valeo(?:\b|[\s\-_/])/.test(low))return 'VALEO';if(/^wix(?:\b|[\s\-_/])/.test(low))return 'WIX';
+ const cuts=[];for(let i=1;i<g.length;i++)if('-/_'.includes(g[i]))cuts.push(i);for(const pos of cuts){const p=normText(g.slice(0,pos));if(p&&originalGroupSet.has(p.toLowerCase()))return p.toUpperCase()}
+ return g.toUpperCase();
 }
-
-function prepareRow(r){
-  const idx=Number(r.__i);
-  const k=keyOf(r,idx);
-  if(committed[k]!==undefined)r.Location1=committed[k];
-  r.__subgroup=normText(r.Group)||'Ungrouped';
-  r.__group=canonicalGroup(r.Group);
-  r.__search=[r.__group,r.__subgroup,r.Code,r.Name,r.Unit,r.Location1].join(' ').toLowerCase();
-  return r;
-}
-function sortData(){data.sort((a,b)=>a.__group.localeCompare(b.__group,undefined,{numeric:true}) || a.__subgroup.localeCompare(b.__subgroup,undefined,{numeric:true}) || clean(a.Code).localeCompare(clean(b.Code),undefined,{numeric:true,sensitivity:'base'}))}
-sortData();
-
+function applyCommitted(r){const k=keyOf(r,r.__i),c=committed[k];if(c&&typeof c==='object'){for(let n=1;n<=3;n++)if(c['Location'+n]!==undefined)r['Location'+n]=c['Location'+n]}}
+function prepareRow(r){applyCommitted(r);r.__subgroup=normText(r.Group)||'Ungrouped';r.__group=canonicalGroup(r.Group);refreshSearchIndexByRow(r);return r}
+function refreshSearchIndexByRow(r){r.__search=[r.__group,r.__subgroup,r.Code,r.Name,r.Unit,r.Location1,r.Location2,r.Location3].join(' ').toLowerCase()}
+function sortData(){data.sort((a,b)=>a.__group.localeCompare(b.__group,undefined,{numeric:true})||a.__subgroup.localeCompare(b.__subgroup,undefined,{numeric:true})||clean(a.Code).localeCompare(clean(b.Code),undefined,{numeric:true,sensitivity:'base'}))}
 const groupSel=document.getElementById('group'),subgroupSel=document.getElementById('subgroup'),search=document.getElementById('search'),tbody=document.getElementById('tbody'),pager=document.getElementById('pager');
-function refreshGroupOptions(){
-  const keep=groupSel.value;
-  const groups=[...new Set(data.map(r=>r.__group))].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
-  groupSel.innerHTML='<option value="">All Groups</option>'+groups.map(g=>`<option value="${esc(g)}">${esc(g)}</option>`).join('');
-  if(groups.includes(keep))groupSel.value=keep;
-  fillSubGroups();
-}
-function fillSubGroups(){
-  const selected=groupSel.value,keep=subgroupSel.value;
-  const list=[...new Set(data.filter(r=>!selected||r.__group===selected).map(r=>r.__subgroup))].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
-  subgroupSel.innerHTML='<option value="">All Sub Groups</option>'+list.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('');
-  if(list.includes(keep))subgroupSel.value=keep;
-}
-refreshGroupOptions();
-
-function savePending(){sessionStorage.setItem('locationPendingV2',JSON.stringify([...pending.entries()]));updateStats()}
-function refreshSearchIndexByRow(r){r.__search=[r.__group,r.__subgroup,r.Code,r.Name,r.Unit,r.Location1].join(' ').toLowerCase()}
-function filterRows(keepPage=false){
-  const q=search.value.trim().toLowerCase(),g=groupSel.value,sg=subgroupSel.value;
-  filtered=data.filter(r=>(!g||r.__group===g)&&(!sg||r.__subgroup===sg)&&(!q||r.__search.includes(q)));
-  if(!keepPage)page=1;render();
-}
+function refreshGroupOptions(){const keep=groupSel.value,groups=[...new Set(data.map(r=>r.__group))].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));groupSel.innerHTML='<option value="">All Groups</option>'+groups.map(g=>`<option value="${esc(g)}">${esc(g)}</option>`).join('');if(groups.includes(keep))groupSel.value=keep;fillSubGroups()}
+function fillSubGroups(){const selected=groupSel.value,keep=subgroupSel.value,list=[...new Set(data.filter(r=>!selected||r.__group===selected).map(r=>r.__subgroup))].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));subgroupSel.innerHTML='<option value="">All Sub Groups</option>'+list.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('');if(list.includes(keep))subgroupSel.value=keep}
+function savePending(){sessionStorage.setItem(PKEY,JSON.stringify([...pending.entries()]));updateStats()}
+function filterRows(keepPage=false){const q=search.value.trim().toLowerCase(),g=groupSel.value,sg=subgroupSel.value;filtered=data.filter(r=>(!g||r.__group===g)&&(!sg||r.__subgroup===sg)&&(!q||r.__search.includes(q)));if(!keepPage)page=1;render()}
 const historyKeys=new Set(history.map(h=>h.key));
-function render(){
-  const start=(page-1)*PAGE,rows=filtered.slice(start,start+PAGE);
-  if(!rows.length){tbody.innerHTML='<tr><td colspan="9" class="empty">No matching product found.</td></tr>'}
-  else tbody.innerHTML=rows.map((r,j)=>{
-    const k=keyOf(r,r.__i),p=pending.get(k),has=p!==undefined&&p!==''; const loc=clean(r.Location1);
-    return `<tr class="${historyKeys.has(k)?'row-updated':''}"><td class="group">${esc(r.__group)}</td><td class="code">${esc(r.Code)}</td><td class="name">${esc(r.Name)}</td><td class="unit">${esc(r.Unit)}</td><td class="loc1">${loc?esc(loc):'<span style="color:#98a2b3;font-weight:600">—</span>'}</td><td class="slash-col"><button class="slash-btn" type="button" data-target="${esc(k)}" title="Add / to New Location">/</button></td><td><input class="loc-input ${has?'pending':''}" inputmode="text" data-key="${esc(k)}" data-i="${r.__i}" value="${esc(has?p:'')}" placeholder="New location"></td></tr>`
-  }).join('');
-  tbody.querySelectorAll('.loc-input').forEach(inp=>inp.addEventListener('input',e=>syncInput(e.target)));
-  tbody.querySelectorAll('.slash-btn').forEach(btn=>btn.addEventListener('click',()=>{
-    const inp=tbody.querySelector(`.loc-input[data-key="${CSS.escape(btn.dataset.target)}"]`); if(!inp)return;
-    const start=inp.selectionStart??inp.value.length,end=inp.selectionEnd??start;
-    inp.value=inp.value.slice(0,start)+'/'+inp.value.slice(end);
-    inp.focus(); inp.setSelectionRange(start+1,start+1); syncInput(inp);
-  }));
-  renderPager();updateStats();
-}
-function syncInput(inp){const k=inp.dataset.key,v=inp.value.trim();if(v)pending.set(k,v);else pending.delete(k);inp.classList.toggle('pending',!!v);savePending()}
-function renderPager(){
-  const pages=Math.max(1,Math.ceil(filtered.length/PAGE));
-  pager.innerHTML=`<button class="btn btn-secondary" ${page<=1?'disabled':''} id="prev">‹ Prev</button><span>Page <b>${page}</b> / ${pages} &nbsp;•&nbsp; ${filtered.length.toLocaleString()} items${backgroundLoading?' &nbsp;•&nbsp; loading remaining master…':''}</span><button class="btn btn-secondary" ${page>=pages?'disabled':''} id="next">Next ›</button>`;
-  document.getElementById('prev').onclick=()=>{if(page>1){page--;render()}};document.getElementById('next').onclick=()=>{if(page<pages){page++;render()}};
-}
-function updateStats(){
-  document.getElementById('totalRows').textContent=EXPECTED_TOTAL.toLocaleString();document.getElementById('resultRows').textContent=filtered.length.toLocaleString();document.getElementById('pendingCount').textContent=pending.size.toLocaleString();document.getElementById('historyCount').textContent=history.length.toLocaleString();
-  document.getElementById('pendingText').textContent=pending.size?`${pending.size} location update(s) pending — Update All to commit.`:'No pending updates.';
-}
+function locHtml(v){v=clean(v);return v?esc(v):'<span style="color:#98a2b3;font-weight:600">—</span>'}
+function render(){const start=(page-1)*PAGE,rows=filtered.slice(start,start+PAGE);if(!rows.length)tbody.innerHTML='<tr><td colspan="10" class="empty">No matching product found.</td></tr>';else tbody.innerHTML=rows.map(r=>{const k=keyOf(r,r.__i),p=pending.get(k),has=!!(p&&clean(p.value)),slot=Number(p?.slot||1);return `<tr class="${historyKeys.has(k)?'row-updated':''}"><td class="group">${esc(r.__group)}</td><td class="code">${esc(r.Code)}</td><td class="name">${esc(r.Name)}</td><td class="unit">${esc(r.Unit)}</td><td class="loc1">${locHtml(r.Location1)}</td><td class="loc2">${locHtml(r.Location2)}</td><td class="loc3">${locHtml(r.Location3)}</td><td><select class="target-select" data-key="${esc(k)}"><option value="1" ${slot===1?'selected':''}>1</option><option value="2" ${slot===2?'selected':''}>2</option><option value="3" ${slot===3?'selected':''}>3</option></select></td><td class="slash-col"><button class="slash-btn" type="button" data-target="${esc(k)}">/</button></td><td><input class="loc-input ${has?'pending':''}" inputmode="text" data-key="${esc(k)}" data-i="${r.__i}" value="${esc(has?p.value:'')}" placeholder="New location"></td></tr>`}).join('');
+ tbody.querySelectorAll('.loc-input').forEach(inp=>inp.addEventListener('input',e=>syncInput(e.target)));
+ tbody.querySelectorAll('.target-select').forEach(sel=>sel.addEventListener('change',()=>{const k=sel.dataset.key,p=pending.get(k);if(p){p.slot=Number(sel.value);pending.set(k,p);savePending()}}));
+ tbody.querySelectorAll('.slash-btn').forEach(btn=>btn.addEventListener('click',()=>{const inp=tbody.querySelector(`.loc-input[data-key="${CSS.escape(btn.dataset.target)}"]`);if(!inp)return;const s=inp.selectionStart??inp.value.length,e=inp.selectionEnd??s;inp.value=inp.value.slice(0,s)+'/'+inp.value.slice(e);inp.focus();inp.setSelectionRange(s+1,s+1);syncInput(inp)}));renderPager();updateStats()}
+function syncInput(inp){const k=inp.dataset.key,v=inp.value.trim(),sel=tbody.querySelector(`.target-select[data-key="${CSS.escape(k)}"]`),slot=Number(sel?.value||pending.get(k)?.slot||1);if(v)pending.set(k,{slot,value:v});else pending.delete(k);inp.classList.toggle('pending',!!v);savePending()}
+function renderPager(){const pages=Math.max(1,Math.ceil(filtered.length/PAGE));pager.innerHTML=`<button class="btn btn-secondary" ${page<=1?'disabled':''} id="prev">‹ Prev</button><span>Page <b>${page}</b> / ${pages} • ${filtered.length.toLocaleString()} items${backgroundLoading?' • loading remaining master…':''}</span><button class="btn btn-secondary" ${page>=pages?'disabled':''} id="next">Next ›</button>`;document.getElementById('prev').onclick=()=>{if(page>1){page--;render()}};document.getElementById('next').onclick=()=>{if(page<pages){page++;render()}}}
+function updateStats(){document.getElementById('totalRows').textContent=EXPECTED_TOTAL.toLocaleString();document.getElementById('resultRows').textContent=filtered.length.toLocaleString();document.getElementById('pendingCount').textContent=pending.size.toLocaleString();document.getElementById('historyCount').textContent=history.length.toLocaleString();document.getElementById('pendingText').textContent=pending.size?`${pending.size} location update(s) pending — Update All to commit.`:'No pending updates.'}
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800)}
 function safeDate(){const d=new Date(),p=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}_${p(d.getHours())}-${p(d.getMinutes())}`}
 function dateParts(d=new Date()){const p=n=>String(n).padStart(2,'0');return {date:`${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`,time:`${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`}}
-function requireXlsx(){if(typeof XLSX==='undefined'){alert('Excel library could not load. Internet connection is required once to load the Excel library.');return false}return true}
-function autoWidths(ws,rows){if(!rows.length)return;const keys=Object.keys(rows[0]);ws['!cols']=keys.map(k=>({wch:Math.min(42,Math.max(10,k.length+2,...rows.slice(0,300).map(r=>clean(r[k]).length+2)))}))}
-function appendJson(wb,rows,name){const safeRows=rows.length?rows:[{Message:'No data available'}];const ws=XLSX.utils.json_to_sheet(safeRows);autoWidths(ws,safeRows);XLSX.utils.book_append_sheet(wb,ws,name)}
-function baseMasterRow(r){const out={};Object.keys(r).filter(k=>!k.startsWith('__')).forEach(k=>out[k]=r[k]);out.Group=r.Group;out.Location1=clean(r.Location1);out['Location Update']='';return out}
-
+function requireXlsx(){if(typeof XLSX==='undefined'){alert('Excel library could not load. Internet connection is required once.');return false}return true}
+function autoWidths(ws,rows){if(!rows.length)return;const keys=Object.keys(rows[0]);ws['!cols']=keys.map(k=>({wch:Math.min(42,Math.max(10,k.length+2,...rows.slice(0,300).map(r=>clean(r[k]).length+2)))}) )}
+function appendJson(wb,rows,name){const x=rows.length?rows:[{Message:'No data available'}],ws=XLSX.utils.json_to_sheet(x);autoWidths(ws,x);XLSX.utils.book_append_sheet(wb,ws,name)}
 function findCoreByIndex(idx){return data.find(x=>Number(x.__i)===Number(idx))}
-function commitAll(){
-  if(!pending.size){toast('No pending updates to commit.');return}if(!requireXlsx())return;
-  const dt=dateParts(new Date()),batch=[];
-  for(const [k,newLocRaw] of pending){
-    const idx=Number(k.split('@@').pop()),r=findCoreByIndex(idx);if(!r)continue;
-    const newLoc=clean(newLocRaw),old=clean(r.Location1);if(!newLoc)continue;
-    r.Location1=newLoc;committed[k]=newLoc;refreshSearchIndexByRow(r);
-    const h={key:k,'Updated Date':dt.date,'Updated Time':dt.time,'Group':r.__group,'Sub Group':r.__subgroup,'Part Number':r.Code,'Name':r.Name,'Unit':r.Unit,'Previous Location1':old,'Location1 (Updated)':newLoc};
-    history.push(h);historyKeys.add(k);batch.push(h);
-  }
-  localStorage.setItem('locationCommittedV2',JSON.stringify(committed));localStorage.setItem('locationHistoryV2',JSON.stringify(history));
-  pending.clear();sessionStorage.removeItem('locationPendingV2');savePending();
-  const wb=XLSX.utils.book_new();appendJson(wb,batch.map(({key,...x})=>x),'Session Updates');XLSX.writeFile(wb,`Location_Updates_${safeDate()}.xlsx`);
-  filterRows();toast(`${batch.length} update(s) committed. Location1 updated + Excel downloaded.`);
-}
-
-function loadScript(src){return new Promise((resolve,reject)=>{const sc=document.createElement('script');sc.src=src;sc.onload=()=>resolve();sc.onerror=reject;document.body.appendChild(sc)})}
-async function fetchGzipJson(src){
-  const res=await fetch(src,{cache:'force-cache'});if(!res.ok)throw new Error(`Could not load ${src} (${res.status})`);
-  if('DecompressionStream' in window && res.body){
-    const stream=res.body.pipeThrough(new DecompressionStream('gzip'));
-    return JSON.parse(await new Response(stream).text());
-  }
-  const bytes=new Uint8Array(await res.arrayBuffer());
-  if(!window.pako)await loadScript('https://cdn.jsdelivr.net/npm/pako@2.1.0/dist/pako.min.js');
-  return JSON.parse(new TextDecoder().decode(window.pako.ungzip(bytes)));
-}
-function coreFromArray(a){return {__i:a[0],Group:a[1],Code:a[2],Name:a[3],Unit:a[4],Location1:a[5]}}
-async function loadFullMaster(){
-  if(!fullMasterPromise)fullMasterPromise=(async()=>{
-    toast('Loading compressed full master for export…');
-    const pack=await fetchGzipJson('master-full.json.gz'), cols=pack.columns||[];
-    return (pack.rows||[]).map(a=>{const o={};for(let i=0;i<cols.length;i++)o[cols[i]]=a[i];return o});
-  })();
-  return fullMasterPromise;
-}
-function overlayCommittedOnFull(full){return full.map((r,idx)=>{const k=clean(r.Code)+'@@'+idx;const out={...r};if(committed[k]!==undefined)out.Location1=committed[k];out['Location Update']='';return out})}
-async function exportFullMaster(){
-  if(!requireXlsx())return;const full=await loadFullMaster();
-  const wb=XLSX.utils.book_new();appendJson(wb,overlayCommittedOnFull(full),'Master');
-  const hist=history.slice().sort((a,b)=>(b['Updated Date']+b['Updated Time']).localeCompare(a['Updated Date']+a['Updated Time'])).map(({key,...h})=>h);appendJson(wb,hist,'Update History');
-  const sum={};history.forEach(h=>{const d=h['Updated Date'];sum[d]=(sum[d]||0)+1});appendJson(wb,Object.entries(sum).sort((a,b)=>b[0].localeCompare(a[0])).map(([date,count])=>({Date:date,'Locations Updated':count})),'Daily Summary');
-  XLSX.writeFile(wb,`Full_Location_Master_${safeDate()}.xlsx`);toast('Complete master exported with all original columns + update history.');
-}
-async function downloadUpdatedOnly(){
-  if(!requireXlsx())return;if(!history.length){toast('No committed updates available yet.');return}
-  const full=await loadFullMaster();
-  const sorted=history.slice().sort((a,b)=>(b['Updated Date']+b['Updated Time']).localeCompare(a['Updated Date']+a['Updated Time']));const latestByKey=new Map();sorted.forEach(h=>{if(!latestByKey.has(h.key))latestByKey.set(h.key,h)});
-  const updatedRows=[...latestByKey.values()].map(h=>{const idx=Number(h.key.split('@@').pop()),src=full[idx]||{},row={...src};if(committed[h.key]!==undefined)row.Location1=committed[h.key];row['Location Update']='';return {'Last Updated Date':h['Updated Date'],'Last Updated Time':h['Updated Time'],'Group (Consolidated)':h.Group,'Sub Group':h['Sub Group'],...row}}).sort((a,b)=>String(b['Last Updated Date']).localeCompare(String(a['Last Updated Date'])) || clean(a.Code).localeCompare(clean(b.Code),undefined,{numeric:true}));
-  const historyRows=sorted.map(({key,...h})=>h),sum={};sorted.forEach(h=>sum[h['Updated Date']]=(sum[h['Updated Date']]||0)+1);
-  const wb=XLSX.utils.book_new();appendJson(wb,updatedRows,'Updated Master Only');appendJson(wb,historyRows,'Date Wise History');appendJson(wb,Object.entries(sum).sort((a,b)=>b[0].localeCompare(a[0])).map(([Date,count])=>({Date,'Locations Updated':count})),'Daily Summary');
-  XLSX.writeFile(wb,`Updated_Master_Only_${safeDate()}.xlsx`);toast('Updated-only master downloaded date-wise.');
-}
-
-async function loadRemainingCore(){
-  const status=document.getElementById('loadStatus');
-  try{
-    status.textContent='Actual locations ready • loading remaining products in background…';
-    await new Promise(r=>setTimeout(r,250));
-    const pack=await fetchGzipJson('data-rest.json.gz');
-    const chunk=(pack.rows||[]).map(coreFromArray);chunk.forEach(prepareRow);data.push(...chunk);
-    sortData();backgroundLoading=false;refreshGroupOptions();filterRows();status.textContent='Full master loaded ✓';
-  }catch(e){backgroundLoading=false;status.textContent='Actual locations ready • remaining data could not load';console.error(e);renderPager();}
-}
-
-async function initializeApp(){
-  const status=document.getElementById('loadStatus');
-  try{
-    status.textContent='Loading actual Location1 data…';
-    const pack=await fetchGzipJson('data-location.json.gz');
-    setOriginalGroups(pack.groups||[]);
-    data=(pack.rows||[]).map(coreFromArray);data.forEach(prepareRow);sortData();
-    refreshGroupOptions();filterRows();
-    status.textContent=`${data.length.toLocaleString()} actual locations ready • loading remaining master…`;
-    if('requestIdleCallback' in window)requestIdleCallback(()=>loadRemainingCore(),{timeout:700});else setTimeout(loadRemainingCore,350);
-  }catch(e){backgroundLoading=false;status.textContent='Data load failed — refresh the page';console.error(e);toast('Master data could not load.');}
-}
-
-
-search.addEventListener('input',()=>{clearTimeout(window.__st);window.__st=setTimeout(filterRows,80)});
-groupSel.addEventListener('change',()=>{subgroupSel.value='';fillSubGroups();filterRows()});subgroupSel.addEventListener('change',filterRows);
-document.getElementById('updateAll').onclick=commitAll;document.getElementById('exportMaster').onclick=exportFullMaster;document.getElementById('downloadUpdated').onclick=downloadUpdatedOnly;
-document.getElementById('clearPending').onclick=()=>{if(pending.size&&confirm('Clear all pending location entries?')){pending.clear();sessionStorage.removeItem('locationPendingV2');savePending();render()}};
-setInterval(()=>document.getElementById('clock').textContent=new Date().toLocaleString(),1000);
-initializeApp();
+function commitAll(){if(!pending.size){toast('No pending updates to commit.');return}if(!requireXlsx())return;const dt=dateParts(),batch=[];for(const [k,p] of pending){const idx=Number(k.split('@@').pop()),r=findCoreByIndex(idx);if(!r)continue;const slot=Math.min(3,Math.max(1,Number(p.slot||1))),field='Location'+slot,newLoc=clean(p.value);if(!newLoc)continue;const old=clean(r[field]);r[field]=newLoc;if(!committed[k]||typeof committed[k]!=='object')committed[k]={};committed[k][field]=newLoc;refreshSearchIndexByRow(r);const h={key:k,'Updated Date':dt.date,'Updated Time':dt.time,'Group':r.__group,'Sub Group':r.__subgroup,'Part Number':r.Code,'Name':r.Name,'Unit':r.Unit,'Target Location':field,'Previous Location':old,'Updated Location':newLoc};history.push(h);historyKeys.add(k);batch.push(h)}localStorage.setItem(CKEY,JSON.stringify(committed));localStorage.setItem(HKEY,JSON.stringify(history));pending.clear();sessionStorage.removeItem(PKEY);savePending();const wb=XLSX.utils.book_new();appendJson(wb,batch.map(({key,...x})=>x),'Session Updates');XLSX.writeFile(wb,`Location_Updates_${safeDate()}.xlsx`);filterRows();toast(`${batch.length} update(s) committed to selected Location1/2/3 + Excel downloaded.`)}
+function loadScript(src){return new Promise((resolve,reject)=>{const sc=document.createElement('script');sc.src=src;sc.onload=resolve;sc.onerror=reject;document.body.appendChild(sc)})}
+async function fetchGzipJson(src){const res=await fetch(src,{cache:'force-cache'});if(!res.ok)throw new Error(`Could not load ${src} (${res.status})`);if('DecompressionStream'in window&&res.body){return JSON.parse(await new Response(res.body.pipeThrough(new DecompressionStream('gzip'))).text())}const bytes=new Uint8Array(await res.arrayBuffer());if(!window.pako)await loadScript('https://cdn.jsdelivr.net/npm/pako@2.1.0/dist/pako.min.js');return JSON.parse(new TextDecoder().decode(window.pako.ungzip(bytes)))}
+function coreFromArray(a){return {__i:a[0],Group:a[1],Code:a[2],Name:a[3],Unit:a[4],Location1:a[5],Location2:a[6],Location3:a[7]}}
+async function loadFullMaster(){if(!fullMasterPromise)fullMasterPromise=(async()=>{toast('Loading compressed full master for export…');const pack=await fetchGzipJson('master-full.json.gz'),cols=pack.columns||[];return (pack.rows||[]).map(a=>{const o={};for(let i=0;i<cols.length;i++)o[cols[i]]=a[i];return o})})();return fullMasterPromise}
+function overlayCommittedOnFull(full){return full.map((r,idx)=>{const k=clean(r.Code)+'@@'+idx,out={...r},c=committed[k];if(c&&typeof c==='object')for(let n=1;n<=3;n++)if(c['Location'+n]!==undefined)out['Location'+n]=c['Location'+n];return out})}
+async function exportFullMaster(){if(!requireXlsx())return;const full=await loadFullMaster(),wb=XLSX.utils.book_new();appendJson(wb,overlayCommittedOnFull(full),'Master');const hist=history.slice().sort((a,b)=>(b['Updated Date']+b['Updated Time']).localeCompare(a['Updated Date']+a['Updated Time'])).map(({key,...h})=>h);appendJson(wb,hist,'Update History');const sum={};history.forEach(h=>sum[h['Updated Date']]=(sum[h['Updated Date']]||0)+1);appendJson(wb,Object.entries(sum).sort((a,b)=>b[0].localeCompare(a[0])).map(([Date,count])=>({Date,'Locations Updated':count})),'Daily Summary');XLSX.writeFile(wb,`Full_Location_Master_${safeDate()}.xlsx`);toast('Complete master exported with Location1, Location2, Location3 updates.')}
+async function downloadUpdatedOnly(){if(!requireXlsx())return;if(!history.length){toast('No committed updates available yet.');return}const full=await loadFullMaster(),sorted=history.slice().sort((a,b)=>(b['Updated Date']+b['Updated Time']).localeCompare(a['Updated Date']+a['Updated Time'])),latestByKey=new Map();sorted.forEach(h=>{if(!latestByKey.has(h.key))latestByKey.set(h.key,h)});const updatedRows=[...latestByKey.values()].map(h=>{const idx=Number(h.key.split('@@').pop()),src=full[idx]||{},row=overlayCommittedOnFull([src])[0];const k=h.key,c=committed[k];if(c)for(let n=1;n<=3;n++)if(c['Location'+n]!==undefined)row['Location'+n]=c['Location'+n];return {'Last Updated Date':h['Updated Date'],'Last Updated Time':h['Updated Time'],'Last Target Location':h['Target Location'],'Group (Consolidated)':h.Group,'Sub Group':h['Sub Group'],...row}});const wb=XLSX.utils.book_new();appendJson(wb,updatedRows,'Updated Master Only');appendJson(wb,sorted.map(({key,...h})=>h),'Date Wise History');const sum={};sorted.forEach(h=>sum[h['Updated Date']]=(sum[h['Updated Date']]||0)+1);appendJson(wb,Object.entries(sum).sort((a,b)=>b[0].localeCompare(a[0])).map(([Date,count])=>({Date,'Locations Updated':count})),'Daily Summary');XLSX.writeFile(wb,`Updated_Master_Only_${safeDate()}.xlsx`);toast('Updated-only master downloaded date-wise.')}
+async function loadRemainingCore(){const status=document.getElementById('loadStatus');try{status.textContent='Saved locations ready • loading remaining products in background…';await new Promise(r=>setTimeout(r,220));const pack=await fetchGzipJson('data-rest.json.gz'),chunk=(pack.rows||[]).map(coreFromArray);chunk.forEach(prepareRow);data.push(...chunk);sortData();backgroundLoading=false;refreshGroupOptions();filterRows();status.textContent='Full master loaded ✓'}catch(e){backgroundLoading=false;status.textContent='Saved locations ready • remaining data could not load';console.error(e);renderPager()}}
+async function initializeApp(){const status=document.getElementById('loadStatus');try{status.textContent='Loading saved Location1 / 2 / 3 data…';const pack=await fetchGzipJson('data-location.json.gz');setOriginalGroups(pack.groups||[]);data=(pack.rows||[]).map(coreFromArray);data.forEach(prepareRow);sortData();refreshGroupOptions();filterRows();status.textContent=`${data.length.toLocaleString()} products with saved locations ready • loading remaining master…`;if('requestIdleCallback'in window)requestIdleCallback(()=>loadRemainingCore(),{timeout:700});else setTimeout(loadRemainingCore,350)}catch(e){backgroundLoading=false;status.textContent='Data load failed — refresh the page';console.error(e);toast('Master data could not load.')}}
+search.addEventListener('input',()=>{clearTimeout(window.__st);window.__st=setTimeout(filterRows,80)});groupSel.addEventListener('change',()=>{subgroupSel.value='';fillSubGroups();filterRows()});subgroupSel.addEventListener('change',filterRows);document.getElementById('updateAll').onclick=commitAll;document.getElementById('exportMaster').onclick=exportFullMaster;document.getElementById('downloadUpdated').onclick=downloadUpdatedOnly;document.getElementById('clearPending').onclick=()=>{if(pending.size&&confirm('Clear all pending location entries?')){pending.clear();sessionStorage.removeItem(PKEY);savePending();render()}};setInterval(()=>document.getElementById('clock').textContent=new Date().toLocaleString(),1000);initializeApp();
 </script>
 </body></html>
