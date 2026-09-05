@@ -159,8 +159,8 @@ async function commitAll(){
   await fetch(SHEET_API,{method:'POST',mode:'no-cors',cache:'no-store',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)});
   await new Promise(r=>setTimeout(r,700));
   const rows=await fetchSheetRows();
-  const sig=new Set(rows.map(x=>[clean(x.Code),clean(x.UpdatedLocation),clean(x.NewValue),clean(x.UpdatedDate),clean(x.UpdatedTime)].join('|')));
-  const ok=payload.every(x=>sig.has([clean(x.Code),clean(x.UpdatedLocation),clean(x.NewValue),clean(x.UpdatedDate),clean(x.UpdatedTime)].join('|')));
+  const sig=new Set(rows.map(x=>[clean(x.Code),clean(x.UpdatedLocation),clean(x.NewValue)].join('|')));
+  const ok=payload.every(x=>sig.has([clean(x.Code),clean(x.UpdatedLocation),clean(x.NewValue)].join('|')));
   if(!ok)throw new Error('Google Sheet did not confirm one or more updates.');
   localStorage.setItem(CKEY,JSON.stringify(committed));localStorage.setItem(HKEY,JSON.stringify(history));
   pending.clear();sessionStorage.removeItem(PKEY);savePending();setCloudStatus('connected ✓',true);
@@ -172,12 +172,12 @@ async function commitAll(){
 let cloudReady=false,lastSheetSync=0;
 function setCloudStatus(text,ok=false){const el=document.getElementById('cloudStatus');if(el){el.textContent='Sheet: '+text;el.style.color=ok?'#067647':'#b54708'}}
 async function fetchHistoryByDate(date){
- const res=await fetch(SHEET_API+'?mode=history&date='+encodeURIComponent(date)+'&t='+Date.now(),{cache:'no-store',redirect:'follow'});
+ const res=await fetch(SHEET_API+'?action=history&date='+encodeURIComponent(date)+'&t='+Date.now(),{cache:'no-store',redirect:'follow'});
  if(!res.ok)throw new Error(`Sheet history HTTP ${res.status}`);
  const txt=await res.text();let rows;
  try{rows=JSON.parse(txt)}catch(_){throw new Error('History API returned non-JSON.')}
  if(rows&&rows.success===false)throw new Error(rows.error||'Apps Script history error');
- return Array.isArray(rows)?rows:[];
+ return Array.isArray(rows)?rows:(Array.isArray(rows.data)?rows.data:[]);
 }
 async function loadDateFilter(silent=false){
  const input=document.getElementById('updateDate'),date=input.value;
@@ -193,12 +193,12 @@ async function loadDateFilter(silent=false){
 function clearDateFilter(){dateFilterActive=false;dateFilterSet.clear();dateHistory=[];selectedHistoryDate='';document.getElementById('updateDate').value='';filterRows();toast('Showing all products.');}
 function downloadSelectedDate(){if(!dateFilterActive||!dateHistory.length){toast('Select a date with updates first.');return}if(!requireXlsx())return;const wb=XLSX.utils.book_new();appendJson(wb,dateHistory,'Date Updates');XLSX.writeFile(wb,`Location_Updates_${selectedHistoryDate}.xlsx`);toast('Selected date updates downloaded.');}
 async function fetchSheetRows(){
- const res=await fetch(SHEET_API+'?mode=latest&t='+Date.now(),{cache:'no-store',redirect:'follow'});
+ const res=await fetch(SHEET_API+'?action=updates&t='+Date.now(),{cache:'no-store',redirect:'follow'});
  if(!res.ok)throw new Error(`Sheet API HTTP ${res.status}`);
  const txt=await res.text();let rows;
  try{rows=JSON.parse(txt)}catch(_){throw new Error('Sheet API returned non-JSON. Check Apps Script deployment access and sheet tab.')}
  if(rows&&rows.success===false)throw new Error(rows.error||'Apps Script error');
- return Array.isArray(rows)?rows:(Array.isArray(rows.rows)?rows.rows:[]);
+ return Array.isArray(rows)?rows:(Array.isArray(rows.data)?rows.data:(Array.isArray(rows.rows)?rows.rows:[]));
 }
 function findRowsForSheetUpdate(x){
  const code=clean(x.Code).toLowerCase(),name=clean(x.Name).toLowerCase();
