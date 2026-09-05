@@ -5,10 +5,6 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Raj Group • Location Master</title>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
-<script src="firebase-config.js"></script>
 <style>
 :root{
   --bg:#f7f9fc;--card:#ffffff;--text:#172033;--muted:#667085;--line:#d9e1ec;
@@ -50,7 +46,7 @@ table{border-collapse:separate;border-spacing:0;width:100%;min-width:820px;font-
       <div class="brand-logo" aria-label="Raj Group"><img src="raj-group-logo.png" alt="Raj Group logo"></div>
       <div><div class="brand-title"><span class="gold">RAJ</span> GROUP • Location Master</div><div class="brand-sub">Product Location Update & Master Export</div></div>
     </div>
-    <div class="clock" id="clock"></div><div id="cloudStatus" style="font-size:11px;font-weight:800;color:#b54708;white-space:nowrap">Cloud: connecting…</div>
+    <div class="clock" id="clock"></div><div id="cloudStatus" style="font-size:11px;font-weight:800;color:#b54708;white-space:nowrap">Sheet: connecting…</div>
   </div>
 </header>
 <div class="wrap">
@@ -87,11 +83,12 @@ table{border-collapse:separate;border-spacing:0;width:100%;min-width:820px;font-
 let data=[];
 const EXPECTED_TOTAL=58893, PAGE=100;
 let page=1, filtered=[], backgroundLoading=true;
-const PKEY='locationPendingV3', CKEY='locationCommittedV3', HKEY='locationHistoryV3';
+const PKEY='locationPendingGS1', CKEY='locationCommittedGS1', HKEY='locationHistoryGS1';
+const SHEET_API='https://script.google.com/macros/s/AKfycbyiuC9UupygFtGMTpdoL8SCzzgQPAd9Pn58gS3nnwcUNNfFVLmaj20rQqpwovQ_4MaYiQ/exec';
 const pending=new Map(JSON.parse(sessionStorage.getItem(PKEY)||'[]'));
 let committed=JSON.parse(localStorage.getItem(CKEY)||'{}');
 let history=JSON.parse(localStorage.getItem(HKEY)||'[]');
-let fullMasterPromise=null, originalGroups=[], originalGroupSet=new Set();
+let fullMasterPromise=null, originalGroups=[], originalGroupSet=new Set(), remoteByCode=new Map();
 function clean(v){return String(v??'').trim()}
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 function keyOf(r,i){return clean(r.Code)+'@@'+i}
@@ -108,7 +105,8 @@ function canonicalGroup(raw){
  return g.toUpperCase();
 }
 function applyCommitted(r){const k=keyOf(r,r.__i),c=committed[k];if(c&&typeof c==='object'){for(let n=1;n<=3;n++)if(c['Location'+n]!==undefined)r['Location'+n]=c['Location'+n]}}
-function prepareRow(r){applyCommitted(r);r.__subgroup=normText(r.Group)||'Ungrouped';r.__group=canonicalGroup(r.Group);refreshSearchIndexByRow(r);return r}
+function applyRemote(r){const list=remoteByCode.get(clean(r.Code).toLowerCase())||[];if(!list.length)return;const name=clean(r.Name).toLowerCase();let use=list;if(name){const exact=list.filter(x=>clean(x.Name).toLowerCase()===name);if(exact.length)use=exact}use.forEach(x=>{for(let n=1;n<=3;n++){const f='Location'+n;if(x[f]!==undefined&&clean(x[f])!=='')r[f]=clean(x[f])}const target=clean(x.UpdatedLocation),nv=clean(x.NewValue);if(/^Location[123]$/.test(target)&&nv)r[target]=nv})}
+function prepareRow(r){applyCommitted(r);applyRemote(r);r.__subgroup=normText(r.Group)||'Ungrouped';r.__group=canonicalGroup(r.Group);refreshSearchIndexByRow(r);return r}
 function refreshSearchIndexByRow(r){r.__search=[r.__group,r.__subgroup,r.Code,r.Name,r.Unit,r.Location1,r.Location2,r.Location3].join(' ').toLowerCase()}
 function sortData(){data.sort((a,b)=>a.__group.localeCompare(b.__group,undefined,{numeric:true})||a.__subgroup.localeCompare(b.__subgroup,undefined,{numeric:true})||clean(a.Code).localeCompare(clean(b.Code),undefined,{numeric:true,sensitivity:'base'}))}
 const groupSel=document.getElementById('group'),subgroupSel=document.getElementById('subgroup'),search=document.getElementById('search'),tbody=document.getElementById('tbody'),pager=document.getElementById('pager');
@@ -135,52 +133,71 @@ function findCoreByIndex(idx){return data.find(x=>Number(x.__i)===Number(idx))}
 async function commitAll(){
  if(!pending.size){toast('No pending updates to commit.');return}
  if(!requireXlsx())return;
- if(!cloudReady){alert('Firebase is not connected yet. Please configure firebase-config.js and refresh.');return}
- const dt=dateParts(),batch=[],cloudWrites=[];
+ if(!cloudReady){alert('Google Sheet backend is not connected yet. Check Sheet/Apps Script setup and refresh.');return}
+ const dt=dateParts(),batch=[],payload=[];
  for(const [k,p] of pending){
   const idx=Number(k.split('@@').pop()),r=findCoreByIndex(idx);if(!r)continue;
   const slot=Math.min(3,Math.max(1,Number(p.slot||1))),field='Location'+slot,newLoc=clean(p.value);if(!newLoc)continue;
   const old=clean(r[field]);r[field]=newLoc;
   if(!committed[k]||typeof committed[k]!=='object')committed[k]={};committed[k][field]=newLoc;
   refreshSearchIndexByRow(r);
-  const h={key:k,'Updated Date':dt.date,'Updated Time':dt.time,'Group':r.__group,'Sub Group':r.__subgroup,'Part Number':r.Code,'Name':r.Name,'Unit':r.Unit,'Target Location':field,'Previous Location':old,'Updated Location':newLoc,'updatedAt':firebase.firestore.FieldValue.serverTimestamp(),'updatedBy':cloudUid||'anonymous'};
-  history.push(h);historyKeys.add(k);batch.push(h);cloudWrites.push({key:k,field,value:newLoc,row:r,history:h});
+  const h={key:k,'Updated Date':dt.date,'Updated Time':dt.time,'Group':r.__group,'Sub Group':r.__subgroup,'Part Number':r.Code,'Name':r.Name,'Unit':r.Unit,'Target Location':field,'Previous Location':old,'Updated Location':newLoc};
+  history.push(h);historyKeys.add(k);batch.push(h);
+  payload.push({Code:clean(r.Code),Group:r.__group,Name:clean(r.Name),Location1:clean(r.Location1),Location2:clean(r.Location2),Location3:clean(r.Location3),UpdatedLocation:field,NewValue:newLoc,UpdatedDate:dt.date,UpdatedTime:dt.time,UpdatedBy:'Raj Group Web'});
  }
- if(!cloudWrites.length){toast('No valid updates found.');return}
+ if(!payload.length){toast('No valid updates found.');return}
  try{
-  // Firestore batches are limited to 500 writes. Keep product updates and history in the same batch chunks.
-  for(let i=0;i<cloudWrites.length;i+=200){
-   const chunk=cloudWrites.slice(i,i+200),wb=cloudDb.batch();
-   chunk.forEach(x=>{
-    wb.set(cloudDb.collection('locationUpdates').doc(x.key),{Code:clean(x.row.Code),Group:x.row.__group,'Sub Group':x.row.__subgroup,Name:clean(x.row.Name),locations:{Location1:clean(x.row.Location1),Location2:clean(x.row.Location2),Location3:clean(x.row.Location3)},lastUpdatedDate:x.history['Updated Date'],lastUpdatedTime:x.history['Updated Time'],updatedBy:cloudUid||'anonymous',updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});
-    wb.set(cloudDb.collection('locationHistory').doc(),x.history);
-   });
-   await wb.commit();
-  }
-  localStorage.setItem(CKEY,JSON.stringify(committed));
-  localStorage.setItem(HKEY,JSON.stringify(history));
-  pending.clear();sessionStorage.removeItem(PKEY);savePending();
+  setCloudStatus('saving…');
+  // no-cors makes Apps Script POST reliable from GitHub Pages; verify immediately with a GET.
+  await fetch(SHEET_API,{method:'POST',mode:'no-cors',cache:'no-store',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)});
+  await new Promise(r=>setTimeout(r,700));
+  const rows=await fetchSheetRows();
+  const sig=new Set(rows.map(x=>[clean(x.Code),clean(x.UpdatedLocation),clean(x.NewValue),clean(x.UpdatedDate),clean(x.UpdatedTime)].join('|')));
+  const ok=payload.every(x=>sig.has([clean(x.Code),clean(x.UpdatedLocation),clean(x.NewValue),clean(x.UpdatedDate),clean(x.UpdatedTime)].join('|')));
+  if(!ok)throw new Error('Google Sheet did not confirm one or more updates.');
+  localStorage.setItem(CKEY,JSON.stringify(committed));localStorage.setItem(HKEY,JSON.stringify(history));
+  pending.clear();sessionStorage.removeItem(PKEY);savePending();setCloudStatus('connected ✓',true);
   const wb=XLSX.utils.book_new();appendJson(wb,batch.map(({key,...x})=>x),'Session Updates');XLSX.writeFile(wb,`Location_Updates_${safeDate()}.xlsx`);
-  filterRows();toast(`${batch.length} update(s) saved to Firebase + Excel downloaded.`);
- }catch(e){console.error(e);toast('Firebase save failed. Local changes were kept; retry Update All.');}
+  filterRows();toast(`${batch.length} update(s) saved to Google Sheet + Excel downloaded.`);
+ }catch(e){console.error(e);setCloudStatus('ERROR: '+(e.message||e));toast('Google Sheet save failed. Pending entries are kept — retry after checking Apps Script.');}
 }
 
-let cloudDb=null,cloudUid=null,cloudReady=false,cloudUnsub=null;
-function setCloudStatus(text,ok=false){const el=document.getElementById('cloudStatus');if(el){el.textContent='Cloud: '+text;el.style.color=ok?'#067647':'#b54708'}}
-async function initFirebase(){
- try{
-  const cfg=window.FIREBASE_CONFIG||{};
-  if(!cfg.apiKey||String(cfg.apiKey).startsWith('YOUR_')){setCloudStatus('not configured');return}
-  if(!firebase.apps.length)firebase.initializeApp(cfg);
-  const auth=firebase.auth(); await auth.signInAnonymously(); cloudUid=auth.currentUser?.uid||'anonymous';
-  cloudDb=firebase.firestore(); cloudReady=true;setCloudStatus('connected ✓',true);
-  const snap=await cloudDb.collection('locationUpdates').get();
-  snap.forEach(doc=>{const d=doc.data(),k=doc.id;if(!committed[k])committed[k]={};const ls=d.locations||{};for(let n=1;n<=3;n++)if(ls['Location'+n]!==undefined)committed[k]['Location'+n]=ls['Location'+n];const r=findCoreByIndex(Number(k.split('@@').pop()));if(r)prepareRow(r)});
-  const hs=await cloudDb.collection('locationHistory').get();
-  history=hs.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>((b['Updated Date']||'')+(b['Updated Time']||'')).localeCompare((a['Updated Date']||'')+(a['Updated Time']||'')));
-  historyKeys.clear();history.forEach(h=>historyKeys.add(h.key));localStorage.setItem(CKEY,JSON.stringify(committed));localStorage.setItem(HKEY,JSON.stringify(history));filterRows();
-  cloudUnsub=cloudDb.collection('locationUpdates').onSnapshot(s=>{s.docChanges().forEach(ch=>{const d=ch.doc.data(),k=ch.doc.id;if(ch.type==='removed')return;if(!committed[k])committed[k]={};const ls=d.locations||{};for(let n=1;n<=3;n++)if(ls['Location'+n]!==undefined)committed[k]['Location'+n]=ls['Location'+n];const r=findCoreByIndex(Number(k.split('@@').pop()));if(r)prepareRow(r)});localStorage.setItem(CKEY,JSON.stringify(committed));filterRows(true)});
- }catch(e){console.error('Firebase init error:', e); const code=e&&e.code?String(e.code):'unknown'; const msg=e&&e.message?String(e.message):String(e); setCloudStatus('ERROR: '+code+' — '+msg.slice(0,140)); const el=document.getElementById('cloudStatus'); if(el){el.title=msg; el.style.maxWidth='520px'; el.style.overflow='hidden'; el.style.textOverflow='ellipsis';} }
+let cloudReady=false,lastSheetSync=0;
+function setCloudStatus(text,ok=false){const el=document.getElementById('cloudStatus');if(el){el.textContent='Sheet: '+text;el.style.color=ok?'#067647':'#b54708'}}
+async function fetchSheetRows(){
+ const res=await fetch(SHEET_API+'?mode=latest&t='+Date.now(),{cache:'no-store',redirect:'follow'});
+ if(!res.ok)throw new Error(`Sheet API HTTP ${res.status}`);
+ const txt=await res.text();let rows;
+ try{rows=JSON.parse(txt)}catch(_){throw new Error('Sheet API returned non-JSON. Check Apps Script deployment access and sheet tab.')}
+ if(rows&&rows.success===false)throw new Error(rows.error||'Apps Script error');
+ return Array.isArray(rows)?rows:(Array.isArray(rows.rows)?rows.rows:[]);
+}
+function findRowsForSheetUpdate(x){
+ const code=clean(x.Code).toLowerCase(),name=clean(x.Name).toLowerCase();
+ let matches=data.filter(r=>clean(r.Code).toLowerCase()===code);
+ if(name){const exact=matches.filter(r=>clean(r.Name).toLowerCase()===name);if(exact.length)matches=exact}
+ return matches;
+}
+function applySheetRows(rows){
+ const latestHistory=[];remoteByCode=new Map();
+ rows.forEach(x=>{const c=clean(x.Code).toLowerCase();if(c){if(!remoteByCode.has(c))remoteByCode.set(c,[]);remoteByCode.get(c).push(x)}});
+ rows.forEach(x=>{
+  const matches=findRowsForSheetUpdate(x);if(!matches.length)return;
+  matches.forEach(r=>{
+   const k=keyOf(r,r.__i);if(!committed[k]||typeof committed[k]!=='object')committed[k]={};
+   for(let n=1;n<=3;n++){const f='Location'+n;if(x[f]!==undefined&&clean(x[f])!=='')committed[k][f]=clean(x[f])}
+   const target=clean(x.UpdatedLocation),nv=clean(x.NewValue);if(/^Location[123]$/.test(target)&&nv)committed[k][target]=nv;
+   applyCommitted(r);refreshSearchIndexByRow(r);
+   const h={key:k,'Updated Date':clean(x.UpdatedDate),'Updated Time':clean(x.UpdatedTime),'Group':r.__group,'Sub Group':r.__subgroup,'Part Number':r.Code,'Name':r.Name,'Unit':r.Unit,'Target Location':target,'Previous Location':'','Updated Location':nv};
+   latestHistory.push(h);historyKeys.add(k);
+  });
+ });
+ if(latestHistory.length){history=latestHistory;localStorage.setItem(HKEY,JSON.stringify(history))}
+ localStorage.setItem(CKEY,JSON.stringify(committed));lastSheetSync=Date.now();
+}
+async function syncGoogleSheet(silent=false){
+ try{if(!silent)setCloudStatus('connecting…');const rows=await fetchSheetRows();applySheetRows(rows);cloudReady=true;setCloudStatus('connected ✓',true);filterRows(true);return true}
+ catch(e){console.error(e);cloudReady=false;setCloudStatus('ERROR: '+(e.message||e));return false}
 }
 function loadScript(src){return new Promise((resolve,reject)=>{const sc=document.createElement('script');sc.src=src;sc.onload=resolve;sc.onerror=reject;document.body.appendChild(sc)})}
 async function fetchGzipJson(src){const res=await fetch(src,{cache:'force-cache'});if(!res.ok)throw new Error(`Could not load ${src} (${res.status})`);if('DecompressionStream'in window&&res.body){return JSON.parse(await new Response(res.body.pipeThrough(new DecompressionStream('gzip'))).text())}const bytes=new Uint8Array(await res.arrayBuffer());if(!window.pako)await loadScript('https://cdn.jsdelivr.net/npm/pako@2.1.0/dist/pako.min.js');return JSON.parse(new TextDecoder().decode(window.pako.ungzip(bytes)))}
@@ -191,6 +208,6 @@ async function exportFullMaster(){if(!requireXlsx())return;const full=await load
 async function downloadUpdatedOnly(){if(!requireXlsx())return;if(!history.length){toast('No committed updates available yet.');return}const full=await loadFullMaster(),sorted=history.slice().sort((a,b)=>(b['Updated Date']+b['Updated Time']).localeCompare(a['Updated Date']+a['Updated Time'])),latestByKey=new Map();sorted.forEach(h=>{if(!latestByKey.has(h.key))latestByKey.set(h.key,h)});const updatedRows=[...latestByKey.values()].map(h=>{const idx=Number(h.key.split('@@').pop()),src=full[idx]||{},row=overlayCommittedOnFull([src])[0];const k=h.key,c=committed[k];if(c)for(let n=1;n<=3;n++)if(c['Location'+n]!==undefined)row['Location'+n]=c['Location'+n];return {'Last Updated Date':h['Updated Date'],'Last Updated Time':h['Updated Time'],'Last Target Location':h['Target Location'],'Group (Consolidated)':h.Group,'Sub Group':h['Sub Group'],...row}});const wb=XLSX.utils.book_new();appendJson(wb,updatedRows,'Updated Master Only');appendJson(wb,sorted.map(({key,...h})=>h),'Date Wise History');const sum={};sorted.forEach(h=>sum[h['Updated Date']]=(sum[h['Updated Date']]||0)+1);appendJson(wb,Object.entries(sum).sort((a,b)=>b[0].localeCompare(a[0])).map(([Date,count])=>({Date,'Locations Updated':count})),'Daily Summary');XLSX.writeFile(wb,`Updated_Master_Only_${safeDate()}.xlsx`);toast('Updated-only master downloaded date-wise.')}
 async function loadRemainingCore(){const status=document.getElementById('loadStatus');try{status.textContent='Saved locations ready • loading remaining products in background…';await new Promise(r=>setTimeout(r,220));const pack=await fetchGzipJson('data-rest.json.gz'),chunk=(pack.rows||[]).map(coreFromArray);chunk.forEach(prepareRow);data.push(...chunk);sortData();backgroundLoading=false;refreshGroupOptions();filterRows();status.textContent='Full master loaded ✓'}catch(e){backgroundLoading=false;status.textContent='Saved locations ready • remaining data could not load';console.error(e);renderPager()}}
 async function initializeApp(){const status=document.getElementById('loadStatus');try{status.textContent='Loading saved Location1 / 2 / 3 data…';const pack=await fetchGzipJson('data-location.json.gz');setOriginalGroups(pack.groups||[]);data=(pack.rows||[]).map(coreFromArray);data.forEach(prepareRow);sortData();refreshGroupOptions();filterRows();status.textContent=`${data.length.toLocaleString()} products with saved locations ready • loading remaining master…`;if('requestIdleCallback'in window)requestIdleCallback(()=>loadRemainingCore(),{timeout:700});else setTimeout(loadRemainingCore,350)}catch(e){backgroundLoading=false;status.textContent='Data load failed — refresh the page';console.error(e);toast('Master data could not load.')}}
-search.addEventListener('input',()=>{clearTimeout(window.__st);window.__st=setTimeout(filterRows,80)});groupSel.addEventListener('change',()=>{subgroupSel.value='';fillSubGroups();filterRows()});subgroupSel.addEventListener('change',filterRows);document.getElementById('updateAll').onclick=commitAll;document.getElementById('exportMaster').onclick=exportFullMaster;document.getElementById('downloadUpdated').onclick=downloadUpdatedOnly;document.getElementById('clearPending').onclick=()=>{if(pending.size&&confirm('Clear all pending location entries?')){pending.clear();sessionStorage.removeItem(PKEY);savePending();render()}};setInterval(()=>document.getElementById('clock').textContent=new Date().toLocaleString(),1000);initFirebase();initializeApp();
+search.addEventListener('input',()=>{clearTimeout(window.__st);window.__st=setTimeout(filterRows,80)});groupSel.addEventListener('change',()=>{subgroupSel.value='';fillSubGroups();filterRows()});subgroupSel.addEventListener('change',filterRows);document.getElementById('updateAll').onclick=commitAll;document.getElementById('exportMaster').onclick=exportFullMaster;document.getElementById('downloadUpdated').onclick=downloadUpdatedOnly;document.getElementById('clearPending').onclick=()=>{if(pending.size&&confirm('Clear all pending location entries?')){pending.clear();sessionStorage.removeItem(PKEY);savePending();render()}};setInterval(()=>document.getElementById('clock').textContent=new Date().toLocaleString(),1000);initializeApp().then(()=>syncGoogleSheet());setInterval(()=>{if(document.visibilityState==='visible'&&Date.now()-lastSheetSync>60000)syncGoogleSheet(true)},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&Date.now()-lastSheetSync>15000)syncGoogleSheet(true)});
 </script>
 </body></html>

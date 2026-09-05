@@ -1,18 +1,27 @@
-# Raj Group Location Master — Firebase Cloud Version
+# Raj Group Location — Google Sheet Backend
 
-This version keeps the static master on GitHub Pages but saves Location1/2/3 updates and update history in Firebase Firestore, so all users/devices see the same committed locations.
+This build keeps the 58,893-row master data in compressed static files for fast GitHub Pages loading. Only changed locations are sent to Google Sheet, so the cloud payload stays small.
 
-## Firebase setup (one time)
-1. Create a Firebase project at https://console.firebase.google.com/.
-2. Add a Web app and copy its Firebase config.
-3. Open `firebase-config.js` and replace all `YOUR_...` values with that config.
-4. Firebase Console → Authentication → Sign-in method → enable **Anonymous**.
-5. Firebase Console → Firestore Database → Create database.
-6. Firestore Rules: paste the contents of `firestore.rules` and Publish.
-7. Upload all files in this folder to GitHub Pages.
+## Connected Apps Script URL
+`https://script.google.com/macros/s/AKfycbyiuC9UupygFtGMTpdoL8SCzzgQPAd9Pn58gS3nnwcUNNfFVLmaj20rQqpwovQ_4MaYiQ/exec`
 
-## Important
-- Firebase config for a web app is not a password/secret. Security is enforced by Firestore Rules.
-- The current rules allow any authenticated anonymous user to read/write location updates. If you want only your staff to update, enable email/password authentication and tighten the rules.
-- Location updates are stored per product in `locationUpdates`; every commit is recorded in `locationHistory`.
-- The original compressed master files remain static on GitHub. They are not overwritten by users.
+## One-time Apps Script update (recommended)
+1. Open `RajGroupLocationUpdates` Google Sheet.
+2. Extensions > Apps Script.
+3. Replace Code.gs with the contents of `GoogleAppsScript.gs` from this ZIP.
+4. Save.
+5. Deploy > Manage deployments > Edit (pencil) > Version: New version > Deploy.
+6. Keep **Execute as: Me** and **Who has access: Anyone**.
+7. Keep the same Web App `/exec` URL.
+
+The script automatically uses/renames the first tab to `Updates`, writes headers if needed, appends updates in one batch, and returns only the latest row per product for faster loading.
+
+## GitHub Pages
+Upload these files to the repository root. Do not upload the ZIP itself. `index.html` already contains the Apps Script URL.
+
+## Data flow
+- Master search/filter: local compressed JSON, no Google Sheet delay.
+- Initial cloud sync: only latest updated products are fetched.
+- Update All: one batched POST to Google Sheet, then verification GET.
+- Background sync: at most about once per minute while the page is visible; returning to the tab can refresh sooner.
+- Full history remains in the Google Sheet itself.
