@@ -1,27 +1,28 @@
-# Raj Group Location — Google Sheet Backend
+# Raj Group Location — Google Sheet Date History Fast Version
 
-This build keeps the 58,893-row master data in compressed static files for fast GitHub Pages loading. Only changed locations are sent to Google Sheet, so the cloud payload stays small.
+This version keeps the 58,893-row master locally in compressed files for speed and uses Google Sheet only for changed products.
 
-## Connected Apps Script URL
-`https://script.google.com/macros/s/AKfycbyiuC9UupygFtGMTpdoL8SCzzgQPAd9Pn58gS3nnwcUNNfFVLmaj20rQqpwovQ_4MaYiQ/exec`
+## Google Sheet design
+- `Updates` = one current/latest row per Part Number + Name. A later update overwrites this row, so this tab stays small and fast.
+- `History` = every location change is appended permanently with date and time.
+- The website date filter requests only one selected date from `History`, so old history does not slow normal loading.
 
-## One-time Apps Script update (recommended)
+## One-time Apps Script upgrade
 1. Open `RajGroupLocationUpdates` Google Sheet.
 2. Extensions > Apps Script.
-3. Replace Code.gs with the contents of `GoogleAppsScript.gs` from this ZIP.
+3. Replace all existing Code.gs code with `GoogleAppsScript.gs` from this ZIP.
 4. Save.
-5. Deploy > Manage deployments > Edit (pencil) > Version: New version > Deploy.
+5. Deploy > Manage deployments > Edit (pencil) > New version > Deploy.
 6. Keep **Execute as: Me** and **Who has access: Anyone**.
-7. Keep the same Web App `/exec` URL.
+7. Keep the same `/exec` URL. No URL change is needed.
 
-The script automatically uses/renames the first tab to `Updates`, writes headers if needed, appends updates in one batch, and returns only the latest row per product for faster loading.
+The script automatically creates a `History` tab. Existing `Updates` data stays available. Future updates overwrite the same product in `Updates` and append a new row in `History`.
+
+## Website date filter
+- Date box defaults to today.
+- `Show Date Updates` displays only products changed on that date.
+- `All Dates` returns to the full master.
+- `Download Date` downloads only the selected day's history to Excel.
 
 ## GitHub Pages
-Upload these files to the repository root. Do not upload the ZIP itself. `index.html` already contains the Apps Script URL.
-
-## Data flow
-- Master search/filter: local compressed JSON, no Google Sheet delay.
-- Initial cloud sync: only latest updated products are fetched.
-- Update All: one batched POST to Google Sheet, then verification GET.
-- Background sync: at most about once per minute while the page is visible; returning to the tab can refresh sooner.
-- Full history remains in the Google Sheet itself.
+Upload all website files from this ZIP to the repository root and replace the old files. Do not upload the ZIP itself.

@@ -1,68 +1,95 @@
-const SHEET_NAME = 'Updates';
+const UPDATE_SHEET = 'Updates';
+const HISTORY_SHEET = 'History';
 const HEADERS = ['Code','Group','Name','Location1','Location2','Location3','UpdatedLocation','NewValue','UpdatedDate','UpdatedTime','UpdatedBy'];
+const HISTORY_HEADERS = ['Code','Group','Name','Location1','Location2','Location3','UpdatedLocation','PreviousLocation','NewValue','UpdatedDate','UpdatedTime','UpdatedBy'];
 
-function getUpdateSheet_() {
+function ensureSheet_(name, headers) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
-  let sheet = ss.getSheetByName(SHEET_NAME);
-  if (!sheet) {
-    sheet = ss.getSheets()[0];
-    sheet.setName(SHEET_NAME);
-  }
-  if (sheet.getLastRow() === 0) {
-    sheet.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS]);
-    sheet.setFrozenRows(1);
+  let sh = ss.getSheetByName(name);
+  if (!sh) sh = ss.insertSheet(name);
+  if (sh.getLastRow() === 0) {
+    sh.getRange(1,1,1,headers.length).setValues([headers]);
+    sh.setFrozenRows(1);
   } else {
-    const current = sheet.getRange(1, 1, 1, HEADERS.length).getDisplayValues()[0];
-    if (current.join('|') !== HEADERS.join('|')) {
-      sheet.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS]);
-      sheet.setFrozenRows(1);
+    const cur = sh.getRange(1,1,1,headers.length).getDisplayValues()[0];
+    if (cur.join('|') !== headers.join('|')) {
+      sh.getRange(1,1,1,headers.length).setValues([headers]);
+      sh.setFrozenRows(1);
     }
   }
-  return sheet;
+  return sh;
+}
+
+function json_(data) {
+  return ContentService.createTextOutput(JSON.stringify(data)).setMimeType(ContentService.MimeType.JSON);
+}
+
+function rowsToObjects_(sh, headers) {
+  const last = sh.getLastRow();
+  if (last <= 1) return [];
+  const vals = sh.getRange(2,1,last-1,headers.length).getDisplayValues();
+  return vals.map(r => Object.fromEntries(headers.map((h,i)=>[h,r[i] || ''])));
 }
 
 function doGet(e) {
   try {
-    const sheet = getUpdateSheet_();
-    const lastRow = sheet.getLastRow();
-    if (lastRow <= 1) return json_([]);
-
-    const values = sheet.getRange(2, 1, lastRow - 1, HEADERS.length).getDisplayValues();
-    const rows = values.map(row => Object.fromEntries(HEADERS.map((h, i) => [h, row[i] || ''])));
     const mode = String((e && e.parameter && e.parameter.mode) || 'latest').toLowerCase();
-
-    if (mode === 'history') return json_(rows);
-
-    // Fast mode: return only the latest state for each Code + Name.
-    const latest = new Map();
-    rows.forEach(r => latest.set(String(r.Code).trim().toLowerCase() + '||' + String(r.Name).trim().toLowerCase(), r));
-    return json_(Array.from(latest.values()));
+    if (mode === 'history') {
+      const sh = ensureSheet_(HISTORY_SHEET, HISTORY_HEADERS);
+      let rows = rowsToObjects_(sh, HISTORY_HEADERS);
+      const date = String((e && e.parameter && e.parameter.date) || '').trim();
+      if (date) rows = rows.filter(r => String(r.UpdatedDate).trim() === date);
+      return json_(rows);
+    }
+    const sh = ensureSheet_(UPDATE_SHEET, HEADERS);
+    return json_(rowsToObjects_(sh, HEADERS));
   } catch (err) {
-    return json_({success:false, error:String(err && err.message ? err.message : err)});
+    return json_({success:false,error:String(err && err.message ? err.message : err)});
   }
 }
 
 function doPost(e) {
   const lock = LockService.getScriptLock();
   try {
-    lock.waitLock(15000);
-    const sheet = getUpdateSheet_();
+    lock.waitLock(20000);
+    const updates = ensureSheet_(UPDATE_SHEET, HEADERS);
+    const hist = ensureSheet_(HISTORY_SHEET, HISTORY_HEADERS);
     const body = JSON.parse((e && e.postData && e.postData.contents) || '[]');
-    const items = Array.isArray(body) ? body : [body];
-    const rows = items.filter(Boolean).map(item => HEADERS.map(h => item[h] == null ? '' : String(item[h])));
-    if (!rows.length) return json_({success:true, saved:0});
+    const items = (Array.isArray(body) ? body : [body]).filter(Boolean);
+    if (!items.length) return json_({success:true,saved:0});
 
-    const start = sheet.getLastRow() + 1;
-    sheet.getRange(start, 1, rows.length, HEADERS.length).setValues(rows);
+    // Build a fast lookup of current rows. Same Part Number + Name = one permanent current row.
+    const existing = rowsToObjects_(updates, HEADERS);
+    const rowByKey = new Map();
+    existing.forEach((r,i)=>rowByKey.set(String(r.Code).trim().toLowerCase()+'||'+String(r.Name).trim().toLowerCase(), i+2));
+
+    const historyRows = [];
+    items.forEach(item => {
+      const key = String(item.Code||'').trim().toLowerCase()+'||'+String(item.Name||'').trim().toLowerCase();
+      const rowNo = rowByKey.get(key);
+      let previous = '';
+      if (rowNo) {
+        const old = updates.getRange(rowNo,1,1,HEADERS.length).getDisplayValues()[0];
+        const target = String(item.UpdatedLocation||'');
+        const idx = HEADERS.indexOf(target);
+        if (idx >= 0) previous = old[idx] || '';
+        updates.getRange(rowNo,1,1,HEADERS.length).setValues([HEADERS.map(h => item[h] == null ? '' : String(item[h]))]);
+      } else {
+        const row = HEADERS.map(h => item[h] == null ? '' : String(item[h]));
+        updates.appendRow(row);
+        rowByKey.set(key, updates.getLastRow());
+      }
+      historyRows.push(HISTORY_HEADERS.map(h => h === 'PreviousLocation' ? previous : (item[h] == null ? '' : String(item[h]))));
+    });
+
+    if (historyRows.length) {
+      hist.getRange(hist.getLastRow()+1,1,historyRows.length,HISTORY_HEADERS.length).setValues(historyRows);
+    }
     SpreadsheetApp.flush();
-    return json_({success:true, saved:rows.length});
+    return json_({success:true,saved:items.length});
   } catch (err) {
-    return json_({success:false, error:String(err && err.message ? err.message : err)});
+    return json_({success:false,error:String(err && err.message ? err.message : err)});
   } finally {
     try { lock.releaseLock(); } catch (_) {}
   }
-}
-
-function json_(data) {
-  return ContentService.createTextOutput(JSON.stringify(data)).setMimeType(ContentService.MimeType.JSON);
 }

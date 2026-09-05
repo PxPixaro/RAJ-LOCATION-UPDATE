@@ -20,7 +20,7 @@ header{position:sticky;top:0;z-index:30;background:linear-gradient(105deg,#fffff
 .brand{display:flex;align-items:center;gap:14px;min-width:0}.brand-logo{width:92px;height:58px;flex:0 0 92px;border-radius:10px;background:#fff;display:grid;place-items:center;overflow:hidden}.brand-logo img{width:100%;height:100%;object-fit:contain}.brand-title{font-size:20px;font-weight:900;letter-spacing:.01em;color:#0058b8}.brand-title .gold{color:#f59f00}.brand-sub{font-size:11px;color:#53657a;margin-top:2px;font-weight:650}.clock{font-size:12px;color:#37506e;white-space:nowrap}
 .wrap{max-width:1700px;margin:auto;padding:16px 18px 28px}
 .toolbar,.stats,.pending-card,.table-card{background:rgba(255,255,255,.96);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow)}
-.toolbar{padding:13px;display:grid;grid-template-columns:minmax(280px,1fr) 185px 215px auto;gap:9px;align-items:center}
+.toolbar{padding:13px;display:grid;grid-template-columns:minmax(260px,1fr) 165px 190px 150px auto;gap:9px;align-items:center}
 .search input,select,.loc-input{width:100%;border:1px solid #c7d2e0;border-radius:10px;padding:10px 12px;font-size:13px;background:#fff;color:var(--text);outline:none;transition:.15s}
 .search input:focus,select:focus,.loc-input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(23,92,211,.11)}
 .btn{border:0;border-radius:10px;padding:10px 13px;font-weight:780;cursor:pointer;font-size:12.5px;white-space:nowrap;transition:.15s}.btn:hover{transform:translateY(-1px)}
@@ -34,7 +34,7 @@ table{border-collapse:separate;border-spacing:0;width:100%;min-width:820px;font-
 .row-updated td{background:linear-gradient(90deg,rgba(236,253,243,.55),transparent 45%)}
 .pagination{padding:11px;display:flex;justify-content:center;gap:8px;align-items:center;border-top:1px solid var(--line);font-size:12px}.empty{padding:55px;text-align:center;color:var(--muted)}
 .toast{position:fixed;right:18px;bottom:18px;background:#102a4c;color:#fff;padding:12px 16px;border-radius:11px;box-shadow:var(--shadow);opacity:0;transform:translateY(12px);pointer-events:none;transition:.2s;z-index:60}.toast.show{opacity:1;transform:none}
-.filter-label{display:none}.hint{padding:8px 11px;background:linear-gradient(90deg,#eef8ff,#fff8df);border:1px solid #d7e7f5;border-left:4px solid var(--gold);border-radius:10px;color:#315578;font-size:11.5px;margin-bottom:11px}
+.filter-label{display:none}.date-filter{display:flex;gap:6px;align-items:center}.date-filter input{width:100%;border:1px solid #c7d2e0;border-radius:10px;padding:9px 8px;font-size:12px;background:#fff;color:var(--text)}.date-active{background:#eef8ff;border:1px solid #9cccf3;color:#075cae}.date-note{font-size:11px;color:#53657a;font-weight:750;white-space:nowrap}.hint{padding:8px 11px;background:linear-gradient(90deg,#eef8ff,#fff8df);border:1px solid #d7e7f5;border-left:4px solid var(--gold);border-radius:10px;color:#315578;font-size:11.5px;margin-bottom:11px}
 @media(max-width:1150px){.toolbar{grid-template-columns:1fr 1fr 1fr}.search{grid-column:1/-1}.actions{grid-column:1/-1;justify-content:flex-start}.table-scroll{max-height:calc(100vh - 400px)}}
 @media(max-width:700px){.toolbar{grid-template-columns:1fr}.search,.actions{grid-column:auto}.header-inner{padding:8px 9px}.wrap{padding:7px}.brand-logo{width:68px;height:43px;flex-basis:68px}.brand-title{font-size:15px}.brand-sub{font-size:9.5px}.clock{display:none}.stats{gap:10px}.pending-card{align-items:flex-start;flex-direction:column}.table-scroll{max-height:calc(100vh - 450px)}table{min-width:690px;font-size:9px}th{font-size:8px;padding:5px 2px;letter-spacing:0}td{padding:5px 2px}.group{width:58px;max-width:58px;white-space:normal;overflow-wrap:anywhere;line-height:1.05}.code{width:78px;max-width:82px;white-space:normal;overflow-wrap:anywhere;font-size:9px;line-height:1.05}.name{min-width:118px;width:145px;max-width:155px;white-space:normal;overflow-wrap:anywhere;line-height:1.08}.unit{width:28px;font-size:9px}.loc-head,.update-head,.target-head{min-width:46px;width:48px}.loc1,.loc2,.loc3{width:48px;max-width:58px;font-size:8.8px;white-space:normal;overflow-wrap:anywhere;line-height:1.02}.target-select{min-width:45px;width:46px;padding:4px 2px;font-size:8.8px}.loc-input{min-width:72px;width:76px;max-width:82px;font-size:9px;padding:5px 3px}.slash-col{width:30px}.slash-btn{width:28px;height:28px;font-size:17px;border-radius:7px}}
 </style>
@@ -55,7 +55,11 @@ table{border-collapse:separate;border-spacing:0;width:100%;min-width:820px;font-
     <div class="search"><input id="search" autocomplete="off" placeholder="Universal Search: Part Number, Name, Location, Group..." /></div>
     <select id="group"><option value="">All Groups</option></select>
     <select id="subgroup"><option value="">All Sub Groups</option></select>
+    <div class="date-filter"><input type="date" id="updateDate" title="Filter by update date"></div>
     <div class="actions">
+      <button class="btn btn-outline" id="showDate">Show Date Updates</button>
+      <button class="btn btn-outline" id="clearDate">All Dates</button>
+      <button class="btn btn-outline" id="downloadDate">Download Date</button>
       <button class="btn btn-outline" id="downloadUpdated">Download Updated Master Only</button>
       <button class="btn btn-secondary" id="exportMaster">Export Full Master</button>
       <button class="btn btn-primary" id="updateAll">Update All & Download</button>
@@ -65,10 +69,11 @@ table{border-collapse:separate;border-spacing:0;width:100%;min-width:820px;font-
     <div class="stat"><b id="totalRows">0</b><span>Total Products</span></div>
     <div class="stat"><b id="resultRows">0</b><span>Search Results</span></div>
     <div class="stat"><b id="pendingCount">0</b><span>Pending This Session</span></div>
-    <div class="stat"><b id="historyCount">0</b><span>Total Updated Entries</span></div>
+    <div class="stat"><b id="historyCount">0</b><span>Loaded Update Entries</span></div>
+    <div class="stat"><b id="dateCount">0</b><span id="dateCountLabel">Date Filter Off</span></div>
   </section>
   <section class="pending-card">
-    <div><strong id="pendingText">No pending updates.</strong><div class="pending-note">हर row में 1 / 2 / 3 चुनें. Update All करने पर चुनी हुई Location1 / Location2 / Location3 में नई location overwrite होगी.</div></div>
+    <div><strong id="pendingText">No pending updates.</strong><div class="pending-note">हर row में 1 / 2 / 3 चुनें. Update All करने पर चुनी हुई Location1 / Location2 / Location3 में नई location overwrite होगी. Date filter से किसी भी दिन के सारे updated part numbers देख सकते हैं.</div></div>
     <button id="clearPending" class="btn btn-danger">Clear Pending</button>
   </section>
   <section class="table-card">
@@ -89,6 +94,7 @@ const pending=new Map(JSON.parse(sessionStorage.getItem(PKEY)||'[]'));
 let committed=JSON.parse(localStorage.getItem(CKEY)||'{}');
 let history=JSON.parse(localStorage.getItem(HKEY)||'[]');
 let fullMasterPromise=null, originalGroups=[], originalGroupSet=new Set(), remoteByCode=new Map();
+let dateFilterActive=false,dateFilterSet=new Set(),dateHistory=[],selectedHistoryDate='';
 function clean(v){return String(v??'').trim()}
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 function keyOf(r,i){return clean(r.Code)+'@@'+i}
@@ -113,7 +119,8 @@ const groupSel=document.getElementById('group'),subgroupSel=document.getElementB
 function refreshGroupOptions(){const keep=groupSel.value,groups=[...new Set(data.map(r=>r.__group))].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));groupSel.innerHTML='<option value="">All Groups</option>'+groups.map(g=>`<option value="${esc(g)}">${esc(g)}</option>`).join('');if(groups.includes(keep))groupSel.value=keep;fillSubGroups()}
 function fillSubGroups(){const selected=groupSel.value,keep=subgroupSel.value,list=[...new Set(data.filter(r=>!selected||r.__group===selected).map(r=>r.__subgroup))].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));subgroupSel.innerHTML='<option value="">All Sub Groups</option>'+list.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('');if(list.includes(keep))subgroupSel.value=keep}
 function savePending(){sessionStorage.setItem(PKEY,JSON.stringify([...pending.entries()]));updateStats()}
-function filterRows(keepPage=false){const q=search.value.trim().toLowerCase(),g=groupSel.value,sg=subgroupSel.value;filtered=data.filter(r=>(!g||r.__group===g)&&(!sg||r.__subgroup===sg)&&(!q||r.__search.includes(q)));if(!keepPage)page=1;render()}
+function itemSig(r){return clean(r.Code).toLowerCase()+'||'+clean(r.Name).toLowerCase()}
+function filterRows(keepPage=false){const q=search.value.trim().toLowerCase(),g=groupSel.value,sg=subgroupSel.value;filtered=data.filter(r=>(!g||r.__group===g)&&(!sg||r.__subgroup===sg)&&(!q||r.__search.includes(q))&&(!dateFilterActive||dateFilterSet.has(itemSig(r))));if(!keepPage)page=1;render()}
 const historyKeys=new Set(history.map(h=>h.key));
 function locHtml(v){v=clean(v);return v?esc(v):'<span style="color:#98a2b3;font-weight:600">—</span>'}
 function render(){const start=(page-1)*PAGE,rows=filtered.slice(start,start+PAGE);if(!rows.length)tbody.innerHTML='<tr><td colspan="10" class="empty">No matching product found.</td></tr>';else tbody.innerHTML=rows.map(r=>{const k=keyOf(r,r.__i),p=pending.get(k),has=!!(p&&clean(p.value)),slot=Number(p?.slot||1);return `<tr class="${historyKeys.has(k)?'row-updated':''}"><td class="group">${esc(r.__group)}</td><td class="code">${esc(r.Code)}</td><td class="name">${esc(r.Name)}</td><td class="unit">${esc(r.Unit)}</td><td class="loc1">${locHtml(r.Location1)}</td><td class="loc2">${locHtml(r.Location2)}</td><td class="loc3">${locHtml(r.Location3)}</td><td><select class="target-select" data-key="${esc(k)}"><option value="1" ${slot===1?'selected':''}>1</option><option value="2" ${slot===2?'selected':''}>2</option><option value="3" ${slot===3?'selected':''}>3</option></select></td><td class="slash-col"><button class="slash-btn" type="button" data-target="${esc(k)}">/</button></td><td><input class="loc-input ${has?'pending':''}" inputmode="text" data-key="${esc(k)}" data-i="${r.__i}" value="${esc(has?p.value:'')}" placeholder="New location"></td></tr>`}).join('');
@@ -122,7 +129,7 @@ function render(){const start=(page-1)*PAGE,rows=filtered.slice(start,start+PAGE
  tbody.querySelectorAll('.slash-btn').forEach(btn=>btn.addEventListener('click',()=>{const inp=tbody.querySelector(`.loc-input[data-key="${CSS.escape(btn.dataset.target)}"]`);if(!inp)return;const s=inp.selectionStart??inp.value.length,e=inp.selectionEnd??s;inp.value=inp.value.slice(0,s)+'/'+inp.value.slice(e);inp.focus();inp.setSelectionRange(s+1,s+1);syncInput(inp)}));renderPager();updateStats()}
 function syncInput(inp){const k=inp.dataset.key,v=inp.value.trim(),sel=tbody.querySelector(`.target-select[data-key="${CSS.escape(k)}"]`),slot=Number(sel?.value||pending.get(k)?.slot||1);if(v)pending.set(k,{slot,value:v});else pending.delete(k);inp.classList.toggle('pending',!!v);savePending()}
 function renderPager(){const pages=Math.max(1,Math.ceil(filtered.length/PAGE));pager.innerHTML=`<button class="btn btn-secondary" ${page<=1?'disabled':''} id="prev">‹ Prev</button><span>Page <b>${page}</b> / ${pages} • ${filtered.length.toLocaleString()} items${backgroundLoading?' • loading remaining master…':''}</span><button class="btn btn-secondary" ${page>=pages?'disabled':''} id="next">Next ›</button>`;document.getElementById('prev').onclick=()=>{if(page>1){page--;render()}};document.getElementById('next').onclick=()=>{if(page<pages){page++;render()}}}
-function updateStats(){document.getElementById('totalRows').textContent=EXPECTED_TOTAL.toLocaleString();document.getElementById('resultRows').textContent=filtered.length.toLocaleString();document.getElementById('pendingCount').textContent=pending.size.toLocaleString();document.getElementById('historyCount').textContent=history.length.toLocaleString();document.getElementById('pendingText').textContent=pending.size?`${pending.size} location update(s) pending — Update All to commit.`:'No pending updates.'}
+function updateStats(){document.getElementById('totalRows').textContent=EXPECTED_TOTAL.toLocaleString();document.getElementById('resultRows').textContent=filtered.length.toLocaleString();document.getElementById('pendingCount').textContent=pending.size.toLocaleString();document.getElementById('historyCount').textContent=history.length.toLocaleString();document.getElementById('dateCount').textContent=(dateFilterActive?dateHistory.length:0).toLocaleString();document.getElementById('dateCountLabel').textContent=dateFilterActive?('Updates on '+selectedHistoryDate):'Date Filter Off';document.getElementById('pendingText').textContent=pending.size?`${pending.size} location update(s) pending — Update All to commit.`:'No pending updates.'}
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800)}
 function safeDate(){const d=new Date(),p=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}_${p(d.getHours())}-${p(d.getMinutes())}`}
 function dateParts(d=new Date()){const p=n=>String(n).padStart(2,'0');return {date:`${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`,time:`${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`}}
@@ -158,12 +165,33 @@ async function commitAll(){
   localStorage.setItem(CKEY,JSON.stringify(committed));localStorage.setItem(HKEY,JSON.stringify(history));
   pending.clear();sessionStorage.removeItem(PKEY);savePending();setCloudStatus('connected ✓',true);
   const wb=XLSX.utils.book_new();appendJson(wb,batch.map(({key,...x})=>x),'Session Updates');XLSX.writeFile(wb,`Location_Updates_${safeDate()}.xlsx`);
-  filterRows();toast(`${batch.length} update(s) saved to Google Sheet + Excel downloaded.`);
+  if(dateFilterActive&&selectedHistoryDate===dt.date)await loadDateFilter(true);else filterRows();toast(`${batch.length} update(s) saved to Google Sheet + Excel downloaded.`);
  }catch(e){console.error(e);setCloudStatus('ERROR: '+(e.message||e));toast('Google Sheet save failed. Pending entries are kept — retry after checking Apps Script.');}
 }
 
 let cloudReady=false,lastSheetSync=0;
 function setCloudStatus(text,ok=false){const el=document.getElementById('cloudStatus');if(el){el.textContent='Sheet: '+text;el.style.color=ok?'#067647':'#b54708'}}
+async function fetchHistoryByDate(date){
+ const res=await fetch(SHEET_API+'?mode=history&date='+encodeURIComponent(date)+'&t='+Date.now(),{cache:'no-store',redirect:'follow'});
+ if(!res.ok)throw new Error(`Sheet history HTTP ${res.status}`);
+ const txt=await res.text();let rows;
+ try{rows=JSON.parse(txt)}catch(_){throw new Error('History API returned non-JSON.')}
+ if(rows&&rows.success===false)throw new Error(rows.error||'Apps Script history error');
+ return Array.isArray(rows)?rows:[];
+}
+async function loadDateFilter(silent=false){
+ const input=document.getElementById('updateDate'),date=input.value;
+ if(!date){if(!silent)toast('Select an update date first.');return false}
+ try{
+  if(!silent)setCloudStatus('loading date…');
+  const rows=await fetchHistoryByDate(date);selectedHistoryDate=date;dateHistory=rows;
+  dateFilterSet=new Set(rows.map(x=>clean(x.Code).toLowerCase()+'||'+clean(x.Name).toLowerCase()));dateFilterActive=true;
+  history=rows.map(x=>({key:'','Updated Date':clean(x.UpdatedDate),'Updated Time':clean(x.UpdatedTime),'Group':clean(x.Group),'Sub Group':'','Part Number':clean(x.Code),'Name':clean(x.Name),'Unit':'','Target Location':clean(x.UpdatedLocation),'Previous Location':clean(x.PreviousLocation),'Updated Location':clean(x.NewValue)}));
+  setCloudStatus('connected ✓',true);filterRows();if(!silent)toast(`${rows.length} update(s) found on ${date}.`);return true;
+ }catch(e){console.error(e);setCloudStatus('ERROR: '+(e.message||e));if(!silent)toast('Could not load date updates.');return false}
+}
+function clearDateFilter(){dateFilterActive=false;dateFilterSet.clear();dateHistory=[];selectedHistoryDate='';document.getElementById('updateDate').value='';filterRows();toast('Showing all products.');}
+function downloadSelectedDate(){if(!dateFilterActive||!dateHistory.length){toast('Select a date with updates first.');return}if(!requireXlsx())return;const wb=XLSX.utils.book_new();appendJson(wb,dateHistory,'Date Updates');XLSX.writeFile(wb,`Location_Updates_${selectedHistoryDate}.xlsx`);toast('Selected date updates downloaded.');}
 async function fetchSheetRows(){
  const res=await fetch(SHEET_API+'?mode=latest&t='+Date.now(),{cache:'no-store',redirect:'follow'});
  if(!res.ok)throw new Error(`Sheet API HTTP ${res.status}`);
@@ -208,6 +236,6 @@ async function exportFullMaster(){if(!requireXlsx())return;const full=await load
 async function downloadUpdatedOnly(){if(!requireXlsx())return;if(!history.length){toast('No committed updates available yet.');return}const full=await loadFullMaster(),sorted=history.slice().sort((a,b)=>(b['Updated Date']+b['Updated Time']).localeCompare(a['Updated Date']+a['Updated Time'])),latestByKey=new Map();sorted.forEach(h=>{if(!latestByKey.has(h.key))latestByKey.set(h.key,h)});const updatedRows=[...latestByKey.values()].map(h=>{const idx=Number(h.key.split('@@').pop()),src=full[idx]||{},row=overlayCommittedOnFull([src])[0];const k=h.key,c=committed[k];if(c)for(let n=1;n<=3;n++)if(c['Location'+n]!==undefined)row['Location'+n]=c['Location'+n];return {'Last Updated Date':h['Updated Date'],'Last Updated Time':h['Updated Time'],'Last Target Location':h['Target Location'],'Group (Consolidated)':h.Group,'Sub Group':h['Sub Group'],...row}});const wb=XLSX.utils.book_new();appendJson(wb,updatedRows,'Updated Master Only');appendJson(wb,sorted.map(({key,...h})=>h),'Date Wise History');const sum={};sorted.forEach(h=>sum[h['Updated Date']]=(sum[h['Updated Date']]||0)+1);appendJson(wb,Object.entries(sum).sort((a,b)=>b[0].localeCompare(a[0])).map(([Date,count])=>({Date,'Locations Updated':count})),'Daily Summary');XLSX.writeFile(wb,`Updated_Master_Only_${safeDate()}.xlsx`);toast('Updated-only master downloaded date-wise.')}
 async function loadRemainingCore(){const status=document.getElementById('loadStatus');try{status.textContent='Saved locations ready • loading remaining products in background…';await new Promise(r=>setTimeout(r,220));const pack=await fetchGzipJson('data-rest.json.gz'),chunk=(pack.rows||[]).map(coreFromArray);chunk.forEach(prepareRow);data.push(...chunk);sortData();backgroundLoading=false;refreshGroupOptions();filterRows();status.textContent='Full master loaded ✓'}catch(e){backgroundLoading=false;status.textContent='Saved locations ready • remaining data could not load';console.error(e);renderPager()}}
 async function initializeApp(){const status=document.getElementById('loadStatus');try{status.textContent='Loading saved Location1 / 2 / 3 data…';const pack=await fetchGzipJson('data-location.json.gz');setOriginalGroups(pack.groups||[]);data=(pack.rows||[]).map(coreFromArray);data.forEach(prepareRow);sortData();refreshGroupOptions();filterRows();status.textContent=`${data.length.toLocaleString()} products with saved locations ready • loading remaining master…`;if('requestIdleCallback'in window)requestIdleCallback(()=>loadRemainingCore(),{timeout:700});else setTimeout(loadRemainingCore,350)}catch(e){backgroundLoading=false;status.textContent='Data load failed — refresh the page';console.error(e);toast('Master data could not load.')}}
-search.addEventListener('input',()=>{clearTimeout(window.__st);window.__st=setTimeout(filterRows,80)});groupSel.addEventListener('change',()=>{subgroupSel.value='';fillSubGroups();filterRows()});subgroupSel.addEventListener('change',filterRows);document.getElementById('updateAll').onclick=commitAll;document.getElementById('exportMaster').onclick=exportFullMaster;document.getElementById('downloadUpdated').onclick=downloadUpdatedOnly;document.getElementById('clearPending').onclick=()=>{if(pending.size&&confirm('Clear all pending location entries?')){pending.clear();sessionStorage.removeItem(PKEY);savePending();render()}};setInterval(()=>document.getElementById('clock').textContent=new Date().toLocaleString(),1000);initializeApp().then(()=>syncGoogleSheet());setInterval(()=>{if(document.visibilityState==='visible'&&Date.now()-lastSheetSync>60000)syncGoogleSheet(true)},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&Date.now()-lastSheetSync>15000)syncGoogleSheet(true)});
+search.addEventListener('input',()=>{clearTimeout(window.__st);window.__st=setTimeout(filterRows,80)});groupSel.addEventListener('change',()=>{subgroupSel.value='';fillSubGroups();filterRows()});subgroupSel.addEventListener('change',filterRows);document.getElementById('updateAll').onclick=commitAll;document.getElementById('exportMaster').onclick=exportFullMaster;document.getElementById('downloadUpdated').onclick=downloadUpdatedOnly;document.getElementById('showDate').onclick=()=>loadDateFilter(false);document.getElementById('clearDate').onclick=clearDateFilter;document.getElementById('downloadDate').onclick=downloadSelectedDate;document.getElementById('updateDate').value=dateParts().date;document.getElementById('clearPending').onclick=()=>{if(pending.size&&confirm('Clear all pending location entries?')){pending.clear();sessionStorage.removeItem(PKEY);savePending();render()}};setInterval(()=>document.getElementById('clock').textContent=new Date().toLocaleString(),1000);initializeApp().then(()=>syncGoogleSheet());setInterval(()=>{if(document.visibilityState==='visible'&&Date.now()-lastSheetSync>60000)syncGoogleSheet(true)},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&Date.now()-lastSheetSync>15000)syncGoogleSheet(true)});
 </script>
 </body></html>
