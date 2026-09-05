@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Raj Group • Location Master</title>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
 <style>
 :root{
   --bg:#f7f9fc;--card:#ffffff;--text:#172033;--muted:#667085;--line:#d9e1ec;
@@ -46,7 +50,7 @@ table{border-collapse:separate;border-spacing:0;width:100%;min-width:820px;font-
       <div class="brand-logo" aria-label="Raj Group"><img src="raj-group-logo.png" alt="Raj Group logo"></div>
       <div><div class="brand-title"><span class="gold">RAJ</span> GROUP • Location Master</div><div class="brand-sub">Product Location Update & Master Export</div></div>
     </div>
-    <div class="clock" id="clock"></div>
+    <div class="clock" id="clock"></div><div id="cloudStatus" style="font-size:11px;font-weight:800;color:#b54708;white-space:nowrap">Cloud: connecting…</div>
   </div>
 </header>
 <div class="wrap">
@@ -128,7 +132,56 @@ function requireXlsx(){if(typeof XLSX==='undefined'){alert('Excel library could 
 function autoWidths(ws,rows){if(!rows.length)return;const keys=Object.keys(rows[0]);ws['!cols']=keys.map(k=>({wch:Math.min(42,Math.max(10,k.length+2,...rows.slice(0,300).map(r=>clean(r[k]).length+2)))}) )}
 function appendJson(wb,rows,name){const x=rows.length?rows:[{Message:'No data available'}],ws=XLSX.utils.json_to_sheet(x);autoWidths(ws,x);XLSX.utils.book_append_sheet(wb,ws,name)}
 function findCoreByIndex(idx){return data.find(x=>Number(x.__i)===Number(idx))}
-function commitAll(){if(!pending.size){toast('No pending updates to commit.');return}if(!requireXlsx())return;const dt=dateParts(),batch=[];for(const [k,p] of pending){const idx=Number(k.split('@@').pop()),r=findCoreByIndex(idx);if(!r)continue;const slot=Math.min(3,Math.max(1,Number(p.slot||1))),field='Location'+slot,newLoc=clean(p.value);if(!newLoc)continue;const old=clean(r[field]);r[field]=newLoc;if(!committed[k]||typeof committed[k]!=='object')committed[k]={};committed[k][field]=newLoc;refreshSearchIndexByRow(r);const h={key:k,'Updated Date':dt.date,'Updated Time':dt.time,'Group':r.__group,'Sub Group':r.__subgroup,'Part Number':r.Code,'Name':r.Name,'Unit':r.Unit,'Target Location':field,'Previous Location':old,'Updated Location':newLoc};history.push(h);historyKeys.add(k);batch.push(h)}localStorage.setItem(CKEY,JSON.stringify(committed));localStorage.setItem(HKEY,JSON.stringify(history));pending.clear();sessionStorage.removeItem(PKEY);savePending();const wb=XLSX.utils.book_new();appendJson(wb,batch.map(({key,...x})=>x),'Session Updates');XLSX.writeFile(wb,`Location_Updates_${safeDate()}.xlsx`);filterRows();toast(`${batch.length} update(s) committed to selected Location1/2/3 + Excel downloaded.`)}
+async function commitAll(){
+ if(!pending.size){toast('No pending updates to commit.');return}
+ if(!requireXlsx())return;
+ if(!cloudReady){alert('Firebase is not connected yet. Please configure firebase-config.js and refresh.');return}
+ const dt=dateParts(),batch=[],cloudWrites=[];
+ for(const [k,p] of pending){
+  const idx=Number(k.split('@@').pop()),r=findCoreByIndex(idx);if(!r)continue;
+  const slot=Math.min(3,Math.max(1,Number(p.slot||1))),field='Location'+slot,newLoc=clean(p.value);if(!newLoc)continue;
+  const old=clean(r[field]);r[field]=newLoc;
+  if(!committed[k]||typeof committed[k]!=='object')committed[k]={};committed[k][field]=newLoc;
+  refreshSearchIndexByRow(r);
+  const h={key:k,'Updated Date':dt.date,'Updated Time':dt.time,'Group':r.__group,'Sub Group':r.__subgroup,'Part Number':r.Code,'Name':r.Name,'Unit':r.Unit,'Target Location':field,'Previous Location':old,'Updated Location':newLoc,'updatedAt':firebase.firestore.FieldValue.serverTimestamp(),'updatedBy':cloudUid||'anonymous'};
+  history.push(h);historyKeys.add(k);batch.push(h);cloudWrites.push({key:k,field,value:newLoc,row:r,history:h});
+ }
+ if(!cloudWrites.length){toast('No valid updates found.');return}
+ try{
+  // Firestore batches are limited to 500 writes. Keep product updates and history in the same batch chunks.
+  for(let i=0;i<cloudWrites.length;i+=200){
+   const chunk=cloudWrites.slice(i,i+200),wb=cloudDb.batch();
+   chunk.forEach(x=>{
+    wb.set(cloudDb.collection('locationUpdates').doc(x.key),{Code:clean(x.row.Code),Group:x.row.__group,'Sub Group':x.row.__subgroup,Name:clean(x.row.Name),locations:{Location1:clean(x.row.Location1),Location2:clean(x.row.Location2),Location3:clean(x.row.Location3)},lastUpdatedDate:x.history['Updated Date'],lastUpdatedTime:x.history['Updated Time'],updatedBy:cloudUid||'anonymous',updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});
+    wb.set(cloudDb.collection('locationHistory').doc(),x.history);
+   });
+   await wb.commit();
+  }
+  localStorage.setItem(CKEY,JSON.stringify(committed));
+  localStorage.setItem(HKEY,JSON.stringify(history));
+  pending.clear();sessionStorage.removeItem(PKEY);savePending();
+  const wb=XLSX.utils.book_new();appendJson(wb,batch.map(({key,...x})=>x),'Session Updates');XLSX.writeFile(wb,`Location_Updates_${safeDate()}.xlsx`);
+  filterRows();toast(`${batch.length} update(s) saved to Firebase + Excel downloaded.`);
+ }catch(e){console.error(e);toast('Firebase save failed. Local changes were kept; retry Update All.');}
+}
+
+let cloudDb=null,cloudUid=null,cloudReady=false,cloudUnsub=null;
+function setCloudStatus(text,ok=false){const el=document.getElementById('cloudStatus');if(el){el.textContent='Cloud: '+text;el.style.color=ok?'#067647':'#b54708'}}
+async function initFirebase(){
+ try{
+  const cfg=window.FIREBASE_CONFIG||{};
+  if(!cfg.apiKey||String(cfg.apiKey).startsWith('YOUR_')){setCloudStatus('not configured');return}
+  if(!firebase.apps.length)firebase.initializeApp(cfg);
+  const auth=firebase.auth(); await auth.signInAnonymously(); cloudUid=auth.currentUser?.uid||'anonymous';
+  cloudDb=firebase.firestore(); cloudReady=true;setCloudStatus('connected ✓',true);
+  const snap=await cloudDb.collection('locationUpdates').get();
+  snap.forEach(doc=>{const d=doc.data(),k=doc.id;if(!committed[k])committed[k]={};const ls=d.locations||{};for(let n=1;n<=3;n++)if(ls['Location'+n]!==undefined)committed[k]['Location'+n]=ls['Location'+n];const r=findCoreByIndex(Number(k.split('@@').pop()));if(r)prepareRow(r)});
+  const hs=await cloudDb.collection('locationHistory').get();
+  history=hs.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>((b['Updated Date']||'')+(b['Updated Time']||'')).localeCompare((a['Updated Date']||'')+(a['Updated Time']||'')));
+  historyKeys.clear();history.forEach(h=>historyKeys.add(h.key));localStorage.setItem(CKEY,JSON.stringify(committed));localStorage.setItem(HKEY,JSON.stringify(history));filterRows();
+  cloudUnsub=cloudDb.collection('locationUpdates').onSnapshot(s=>{s.docChanges().forEach(ch=>{const d=ch.doc.data(),k=ch.doc.id;if(ch.type==='removed')return;if(!committed[k])committed[k]={};const ls=d.locations||{};for(let n=1;n<=3;n++)if(ls['Location'+n]!==undefined)committed[k]['Location'+n]=ls['Location'+n];const r=findCoreByIndex(Number(k.split('@@').pop()));if(r)prepareRow(r)});localStorage.setItem(CKEY,JSON.stringify(committed));filterRows(true)});
+ }catch(e){console.error(e);setCloudStatus('error — check Firebase setup')}
+}
 function loadScript(src){return new Promise((resolve,reject)=>{const sc=document.createElement('script');sc.src=src;sc.onload=resolve;sc.onerror=reject;document.body.appendChild(sc)})}
 async function fetchGzipJson(src){const res=await fetch(src,{cache:'force-cache'});if(!res.ok)throw new Error(`Could not load ${src} (${res.status})`);if('DecompressionStream'in window&&res.body){return JSON.parse(await new Response(res.body.pipeThrough(new DecompressionStream('gzip'))).text())}const bytes=new Uint8Array(await res.arrayBuffer());if(!window.pako)await loadScript('https://cdn.jsdelivr.net/npm/pako@2.1.0/dist/pako.min.js');return JSON.parse(new TextDecoder().decode(window.pako.ungzip(bytes)))}
 function coreFromArray(a){return {__i:a[0],Group:a[1],Code:a[2],Name:a[3],Unit:a[4],Location1:a[5],Location2:a[6],Location3:a[7]}}
@@ -138,6 +191,6 @@ async function exportFullMaster(){if(!requireXlsx())return;const full=await load
 async function downloadUpdatedOnly(){if(!requireXlsx())return;if(!history.length){toast('No committed updates available yet.');return}const full=await loadFullMaster(),sorted=history.slice().sort((a,b)=>(b['Updated Date']+b['Updated Time']).localeCompare(a['Updated Date']+a['Updated Time'])),latestByKey=new Map();sorted.forEach(h=>{if(!latestByKey.has(h.key))latestByKey.set(h.key,h)});const updatedRows=[...latestByKey.values()].map(h=>{const idx=Number(h.key.split('@@').pop()),src=full[idx]||{},row=overlayCommittedOnFull([src])[0];const k=h.key,c=committed[k];if(c)for(let n=1;n<=3;n++)if(c['Location'+n]!==undefined)row['Location'+n]=c['Location'+n];return {'Last Updated Date':h['Updated Date'],'Last Updated Time':h['Updated Time'],'Last Target Location':h['Target Location'],'Group (Consolidated)':h.Group,'Sub Group':h['Sub Group'],...row}});const wb=XLSX.utils.book_new();appendJson(wb,updatedRows,'Updated Master Only');appendJson(wb,sorted.map(({key,...h})=>h),'Date Wise History');const sum={};sorted.forEach(h=>sum[h['Updated Date']]=(sum[h['Updated Date']]||0)+1);appendJson(wb,Object.entries(sum).sort((a,b)=>b[0].localeCompare(a[0])).map(([Date,count])=>({Date,'Locations Updated':count})),'Daily Summary');XLSX.writeFile(wb,`Updated_Master_Only_${safeDate()}.xlsx`);toast('Updated-only master downloaded date-wise.')}
 async function loadRemainingCore(){const status=document.getElementById('loadStatus');try{status.textContent='Saved locations ready • loading remaining products in background…';await new Promise(r=>setTimeout(r,220));const pack=await fetchGzipJson('data-rest.json.gz'),chunk=(pack.rows||[]).map(coreFromArray);chunk.forEach(prepareRow);data.push(...chunk);sortData();backgroundLoading=false;refreshGroupOptions();filterRows();status.textContent='Full master loaded ✓'}catch(e){backgroundLoading=false;status.textContent='Saved locations ready • remaining data could not load';console.error(e);renderPager()}}
 async function initializeApp(){const status=document.getElementById('loadStatus');try{status.textContent='Loading saved Location1 / 2 / 3 data…';const pack=await fetchGzipJson('data-location.json.gz');setOriginalGroups(pack.groups||[]);data=(pack.rows||[]).map(coreFromArray);data.forEach(prepareRow);sortData();refreshGroupOptions();filterRows();status.textContent=`${data.length.toLocaleString()} products with saved locations ready • loading remaining master…`;if('requestIdleCallback'in window)requestIdleCallback(()=>loadRemainingCore(),{timeout:700});else setTimeout(loadRemainingCore,350)}catch(e){backgroundLoading=false;status.textContent='Data load failed — refresh the page';console.error(e);toast('Master data could not load.')}}
-search.addEventListener('input',()=>{clearTimeout(window.__st);window.__st=setTimeout(filterRows,80)});groupSel.addEventListener('change',()=>{subgroupSel.value='';fillSubGroups();filterRows()});subgroupSel.addEventListener('change',filterRows);document.getElementById('updateAll').onclick=commitAll;document.getElementById('exportMaster').onclick=exportFullMaster;document.getElementById('downloadUpdated').onclick=downloadUpdatedOnly;document.getElementById('clearPending').onclick=()=>{if(pending.size&&confirm('Clear all pending location entries?')){pending.clear();sessionStorage.removeItem(PKEY);savePending();render()}};setInterval(()=>document.getElementById('clock').textContent=new Date().toLocaleString(),1000);initializeApp();
+search.addEventListener('input',()=>{clearTimeout(window.__st);window.__st=setTimeout(filterRows,80)});groupSel.addEventListener('change',()=>{subgroupSel.value='';fillSubGroups();filterRows()});subgroupSel.addEventListener('change',filterRows);document.getElementById('updateAll').onclick=commitAll;document.getElementById('exportMaster').onclick=exportFullMaster;document.getElementById('downloadUpdated').onclick=downloadUpdatedOnly;document.getElementById('clearPending').onclick=()=>{if(pending.size&&confirm('Clear all pending location entries?')){pending.clear();sessionStorage.removeItem(PKEY);savePending();render()}};setInterval(()=>document.getElementById('clock').textContent=new Date().toLocaleString(),1000);initFirebase();initializeApp();
 </script>
 </body></html>
