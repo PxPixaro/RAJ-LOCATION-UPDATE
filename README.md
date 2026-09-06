@@ -1,28 +1,26 @@
-# Raj Group Location — Google Sheet Date History Fast Version
+# Raj Group Location — Google Sheet Old/New Value Version
 
-This version keeps the 58,893-row master locally in compressed files for speed and uses Google Sheet only for changed products.
+This build keeps the existing fast static master data and the same Google Sheet backend URL.
 
-## Google Sheet design
-- `Updates` = one current/latest row per Part Number + Name. A later update overwrites this row, so this tab stays small and fast.
-- `History` = every location change is appended permanently with date and time.
-- The website date filter requests only one selected date from `History`, so old history does not slow normal loading.
+## What changed
+- `Location1 / Location2 / Location3` always show the latest/current value.
+- `OldValue` records the value before the latest change.
+- `NewValue` records the new value entered by the user.
+- `Updates` keeps one latest/current row per Part Number + Name.
+- `History` appends every change permanently with date/time.
+- Date filter and exports continue to use the History data.
+- Existing Google Sheet rows are preserved. On first run, the script inserts/renames the `OldValue` column without deleting existing data.
 
-## One-time Apps Script upgrade
-1. Open `RajGroupLocationUpdates` Google Sheet.
+## Important behavior
+The static master JSON files on GitHub are not physically rewritten. When the website opens, Google Sheet updates are overlaid on top of the master, so users see the latest Location1/2/3. `Export Full Master` also exports those latest overlaid values.
+
+## Apps Script deployment
+1. Open Google Sheet `RajGroupLocationUpdates`.
 2. Extensions > Apps Script.
-3. Replace all existing Code.gs code with `GoogleAppsScript.gs` from this ZIP.
+3. Replace all `Code.gs` content with `GoogleAppsScript.gs` from this ZIP.
 4. Save.
-5. Deploy > Manage deployments > Edit (pencil) > New version > Deploy.
-6. Keep **Execute as: Me** and **Who has access: Anyone**.
-7. Keep the same `/exec` URL. No URL change is needed.
+5. Deploy > Manage deployments > Edit/Pencil > Version: New version > Deploy.
+6. Execute as: Me; Who has access: Anyone.
+7. Test the existing `/exec?action=ping` URL.
 
-The script automatically creates a `History` tab. Existing `Updates` data stays available. Future updates overwrite the same product in `Updates` and append a new row in `History`.
-
-## Website date filter
-- Date box defaults to today.
-- `Show Date Updates` displays only products changed on that date.
-- `All Dates` returns to the full master.
-- `Download Date` downloads only the selected day's history to Excel.
-
-## GitHub Pages
-Upload all website files from this ZIP to the repository root and replace the old files. Do not upload the ZIP itself.
+Spreadsheet ID is already configured in the script.

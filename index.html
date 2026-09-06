@@ -150,7 +150,7 @@ async function commitAll(){
   refreshSearchIndexByRow(r);
   const h={key:k,'Updated Date':dt.date,'Updated Time':dt.time,'Group':r.__group,'Sub Group':r.__subgroup,'Part Number':r.Code,'Name':r.Name,'Unit':r.Unit,'Target Location':field,'Previous Location':old,'Updated Location':newLoc};
   history.push(h);historyKeys.add(k);batch.push(h);
-  payload.push({Code:clean(r.Code),Group:r.__group,Name:clean(r.Name),Location1:clean(r.Location1),Location2:clean(r.Location2),Location3:clean(r.Location3),UpdatedLocation:field,NewValue:newLoc,UpdatedDate:dt.date,UpdatedTime:dt.time,UpdatedBy:'Raj Group Web'});
+  payload.push({Code:clean(r.Code),Group:r.__group,Name:clean(r.Name),Location1:clean(r.Location1),Location2:clean(r.Location2),Location3:clean(r.Location3),UpdatedLocation:field,OldValue:old,NewValue:newLoc,UpdatedDate:dt.date,UpdatedTime:dt.time,UpdatedBy:'Raj Group Web'});
  }
  if(!payload.length){toast('No valid updates found.');return}
  try{
@@ -186,7 +186,7 @@ async function loadDateFilter(silent=false){
   if(!silent)setCloudStatus('loading date…');
   const rows=await fetchHistoryByDate(date);selectedHistoryDate=date;dateHistory=rows;
   dateFilterSet=new Set(rows.map(x=>clean(x.Code).toLowerCase()+'||'+clean(x.Name).toLowerCase()));dateFilterActive=true;
-  history=rows.map(x=>({key:'','Updated Date':clean(x.UpdatedDate),'Updated Time':clean(x.UpdatedTime),'Group':clean(x.Group),'Sub Group':'','Part Number':clean(x.Code),'Name':clean(x.Name),'Unit':'','Target Location':clean(x.UpdatedLocation),'Previous Location':clean(x.PreviousLocation),'Updated Location':clean(x.NewValue)}));
+  history=rows.map(x=>({key:'','Updated Date':clean(x.UpdatedDate),'Updated Time':clean(x.UpdatedTime),'Group':clean(x.Group),'Sub Group':'','Part Number':clean(x.Code),'Name':clean(x.Name),'Unit':'','Target Location':clean(x.UpdatedLocation),'Previous Location':clean(x.OldValue||x.PreviousLocation),'Updated Location':clean(x.NewValue)}));
   setCloudStatus('connected ✓',true);filterRows();if(!silent)toast(`${rows.length} update(s) found on ${date}.`);return true;
  }catch(e){console.error(e);setCloudStatus('ERROR: '+(e.message||e));if(!silent)toast('Could not load date updates.');return false}
 }
@@ -216,7 +216,7 @@ function applySheetRows(rows){
    for(let n=1;n<=3;n++){const f='Location'+n;if(x[f]!==undefined&&clean(x[f])!=='')committed[k][f]=clean(x[f])}
    const target=clean(x.UpdatedLocation),nv=clean(x.NewValue);if(/^Location[123]$/.test(target)&&nv)committed[k][target]=nv;
    applyCommitted(r);refreshSearchIndexByRow(r);
-   const h={key:k,'Updated Date':clean(x.UpdatedDate),'Updated Time':clean(x.UpdatedTime),'Group':r.__group,'Sub Group':r.__subgroup,'Part Number':r.Code,'Name':r.Name,'Unit':r.Unit,'Target Location':target,'Previous Location':'','Updated Location':nv};
+   const h={key:k,'Updated Date':clean(x.UpdatedDate),'Updated Time':clean(x.UpdatedTime),'Group':r.__group,'Sub Group':r.__subgroup,'Part Number':r.Code,'Name':r.Name,'Unit':r.Unit,'Target Location':target,'Previous Location':clean(x.OldValue||x.PreviousLocation),'Updated Location':nv};
    latestHistory.push(h);historyKeys.add(k);
   });
  });
