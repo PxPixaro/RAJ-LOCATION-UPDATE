@@ -24,3 +24,9 @@ The static master JSON files on GitHub are not physically rewritten. When the we
 7. Test the existing `/exec?action=ping` URL.
 
 Spreadsheet ID is already configured in the script.
+
+Responsive update:
+- iPhone/iOS input and select controls use 16px computed font size to prevent Safari auto-zoom on focus.
+- Portrait mobile keeps the compact table widths while enlarging the Update Location interaction area slightly.
+- Landscape phone and tablet views no longer use a viewport-height table cap, so rows remain visible after rotation and the page can scroll normally.
+- Google Sheet / Apps Script / OldValue + NewValue logic is unchanged.
